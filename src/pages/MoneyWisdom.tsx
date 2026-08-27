@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
+import { useUpgradeModal } from '../components/UpgradeModalProvider'
 import { financialRules, type FinancialRule } from '../data/financialRules'
 import {
   calculateBudget503020,
@@ -333,7 +334,7 @@ function RuleCalculator({ rule, lang }: { rule: FinancialRule; lang: 'en' | 'ru'
 export default function MoneyWisdom() {
   const { t, i18n } = useTranslation()
   const { subscriptionStatus } = useAuth()
-  const [selectedRule, setSelectedRule] = useState<FinancialRule | null>(null)
+  const { openUpgrade } = useUpgradeModal()
   const lang = getLangKey(i18n.language || 'en') as 'en' | 'ru' | 'uz'
   const isPro = subscriptionStatus === 'pro'
 
@@ -366,12 +367,12 @@ export default function MoneyWisdom() {
                 <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">{rule.category}</div>
               </div>
 
-              {isLocked ? (
+                  {isLocked ? (
                 <div className="mt-5 rounded-2xl border border-[#F8D66D]/40 bg-[#FFFDF1] p-5">
                   <div className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#FDE68A]">🔒 PRO</div>
                   <p className="mt-3 text-lg font-bold text-slate-900">{mainTitle}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">{previewText}</p>
-                  <button type="button" onClick={() => setSelectedRule(rule)} className="mt-4 rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-2 text-sm font-bold text-slate-900 shadow-[0_10px_30px_rgba(245,158,11,0.35)]">
+                  <button type="button" onClick={() => openUpgrade({ featureTitle: rule.title[lang] })} className="mt-4 rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-2 text-sm font-bold text-slate-900 shadow-[0_10px_30px_rgba(245,158,11,0.35)]">
                     {t('unlock_with_finora_pro')}
                   </button>
                 </div>
@@ -413,25 +414,7 @@ export default function MoneyWisdom() {
         })}
       </div>
 
-      {selectedRule && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
-          <div className="w-full max-w-xl rounded-[28px] border border-[#F8D66D]/30 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.4)]">
-            <div className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#FDE68A]">🚫 Pro</div>
-            <h3 className="mt-4 text-3xl font-black text-slate-900">{t('unlock_finora_pro')}</h3>
-            <div className="mt-3 text-2xl font-black text-[#7C4A00]">100,000 UZS / month</div>
-            <div className="mt-1 text-sm text-slate-600">7-day free trial</div>
-            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{t('pro_feature')}</div>
-              <div className="mt-2 text-xl font-black text-slate-900">{selectedRule.title[lang]}</div>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{selectedRule.shortDescription[lang]}</p>
-            </div>
-            <div className="mt-5 flex gap-3">
-              <button type="button" className="flex-1 rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-3 text-sm font-bold text-slate-900">{t('start_7_day_trial')}</button>
-              <button type="button" onClick={() => setSelectedRule(null)} className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700">{t('close')}</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Upgrade modal is provided globally by UpgradeModalProvider */}
     </div>
   )
 }

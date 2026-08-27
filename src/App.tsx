@@ -10,6 +10,7 @@ import VerifyEmail from './pages/VerifyEmail'
 import Dashboard from './pages/Dashboard'
 import MoneyWisdom from './pages/MoneyWisdom'
 import { useAuth, AuthProvider } from './hooks/useAuth'
+import { UpgradeModalProvider } from './components/UpgradeModalProvider'
 import Onboarding from './pages/Onboarding'
 import { supabase } from './lib/supabase'
 
@@ -119,7 +120,9 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <UpgradeModalProvider>
+        <AppRoutes />
+      </UpgradeModalProvider>
     </AuthProvider>
   )
 }

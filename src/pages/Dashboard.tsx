@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAuth } from '../hooks/useAuth'
+import MoneyWisdom from './MoneyWisdom'
+import { useUpgradeModal } from '../components/UpgradeModalProvider'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
@@ -13,7 +15,7 @@ type Goal = {
   monthly: number
 }
 
-type TabKey = 'home' | 'account' | 'goals' | 'calculators'
+type TabKey = 'home' | 'account' | 'goals' | 'calculators' | 'money_wisdom'
 
 type Debt = {
   id: string
@@ -63,11 +65,12 @@ function getGoalCountdown(goal: Goal) {
 
 export default function Dashboard() {
   const { user, signOut, subscriptionStatus, activatePro, refreshSubscription } = useAuth()
+  const { openUpgrade } = useUpgradeModal()
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
   const [activeTab, setActiveTab] = useState<TabKey>('home')
   const [profile, setProfile] = useState<any>(null)
-  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false)
+  // upgrade modal is provided by UpgradeModalProvider
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false)
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
   const [isDeleteGoalOpen, setIsDeleteGoalOpen] = useState(false)
@@ -76,8 +79,7 @@ export default function Dashboard() {
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null)
   const [savingAccount, setSavingAccount] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
-  const [promoCode, setPromoCode] = useState('')
-  const [promoNotice, setPromoNotice] = useState<string | null>(null)
+  
   const [goalForm, setGoalForm] = useState({ name: '', target: '', current: '', monthly: '' })
   const [accountDraft, setAccountDraft] = useState({
     monthly_income: '',
@@ -329,7 +331,8 @@ export default function Dashboard() {
     { key: 'home', label: t('home_tab'), icon: '🏠' },
     { key: 'account', label: t('account_tab'), icon: '👤' },
     { key: 'goals', label: t('goals_tab'), icon: '🎯' },
-    { key: 'calculators', label: t('calculators_tab'), icon: '🧮' }
+    { key: 'calculators', label: t('calculators_tab'), icon: '🧮' },
+    { key: 'money_wisdom', label: t('money_wisdom'), icon: '💡' }
   ]
 
   const persistGoals = (nextGoals: Goal[]) => {
@@ -366,7 +369,7 @@ export default function Dashboard() {
 
     if (!isPro && goals.length >= 5) {
       setIsGoalModalOpen(false)
-      setIsUpgradeOpen(true)
+      openUpgrade()
       return
     }
 
@@ -396,8 +399,8 @@ export default function Dashboard() {
     if (total <= 0 || payment <= 0) return
 
     if (debts.length >= debtLimit) {
-      setPromoNotice(isPro ? t('debt_limit_pro') : t('debt_limit_free'))
-      setIsUpgradeOpen(true)
+      setToast(isPro ? t('debt_limit_pro') : t('debt_limit_free'))
+      openUpgrade()
       return
     }
 
@@ -432,7 +435,7 @@ export default function Dashboard() {
     }
 
     setDebtDraft({ name: debtCategories[0]?.value || 'Автокредит', total: '', payment: '', rate: '0' })
-    setPromoNotice(t('debt_added_success'))
+    setToast(t('debt_added_success'))
   }
 
   const makeDebtPayment = (debtId: string) => {
@@ -536,33 +539,7 @@ export default function Dashboard() {
     }
   }
 
-  const applyPromoCode = async (event?: React.FormEvent) => {
-    event?.preventDefault()
-    const validCode = 'Liverpool@0'
-    const trimmedCode = promoCode.trim()
 
-    if (trimmedCode !== validCode) {
-      setPromoNotice(t('invalid_promo'))
-      return
-    }
-
-    if (!user?.id) {
-      setPromoNotice(t('session_missing'))
-      return
-    }
-
-    const activated = await activatePro()
-    if (activated) {
-      setProfile((prev: any) => ({ ...prev, subscription_status: 'pro', trial_end: null }))
-      await refreshSubscription()
-      setPromoNotice(t('pro_activated'))
-      setPromoCode('')
-      setIsUpgradeOpen(false)
-      return
-    }
-
-    setPromoNotice(t('session_missing'))
-  }
 
   const handleLogout = async () => {
     await signOut()
@@ -720,7 +697,7 @@ export default function Dashboard() {
                 <div className="text-3xl font-black text-[#FFD700]">100 000 UZS</div>
                 <div className="mt-1 text-sm text-slate-200">{t('per_month')}</div>
               </div>
-              <button type="button" onClick={() => setIsUpgradeOpen(true)} className="mt-5 w-full rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-3 text-base font-black text-slate-900">
+              <button type="button" onClick={() => openUpgrade()} className="mt-5 w-full rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-3 text-base font-black text-slate-900">
                 {t('upgrade_pro_button')}
               </button>
 
@@ -760,6 +737,12 @@ export default function Dashboard() {
               <div className="mt-2 text-2xl font-black text-slate-900">{formatMoney(Number(profile?.monthly_savings || 0))} UZS</div>
             </div>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'money_wisdom' && (
+        <div>
+          <MoneyWisdom />
         </div>
       )}
 
@@ -1179,50 +1162,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {isUpgradeOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
-          <div className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D4AF37]">{t('upgrade')}</p>
-                <h3 className="mt-2 text-2xl font-black text-slate-900">{t('unlock_pro')}</h3>
-              </div>
-              <button type="button" onClick={() => setIsUpgradeOpen(false)} className="text-xl text-slate-500">×</button>
-            </div>
-
-            <div className="mt-5 rounded-2xl bg-[#FFF8D6] p-4 text-slate-900">
-              <div className="text-lg font-black">100 000 UZS / {t('month')}</div>
-              <div className="mt-1 text-sm text-slate-700">{t('upgrade_desc')}</div>
-            </div>
-
-            <form onSubmit={applyPromoCode} className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <label className="mb-2 block text-sm font-medium text-slate-700">{t('promo_placeholder')}</label>
-              <input
-                type="text"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-                placeholder={t('promo_placeholder')}
-                className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900 outline-none focus:border-[#D4AF37]"
-              />
-              <div className="mt-3 flex gap-2">
-                <button type="submit" className="flex-1 rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-3 font-bold text-slate-900">
-                  {t('continue')}
-                </button>
-              </div>
-              {promoNotice && <div className="mt-3 text-sm font-medium text-[#7C4A00]">{promoNotice}</div>}
-            </form>
-
-            <div className="mt-6 flex gap-3">
-              <a href="https://t.me/Bilol_44" target="_blank" rel="noreferrer" className="flex-1 rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-3 text-center font-bold text-slate-900">
-                {t('contact_telegram')}
-              </a>
-              <button type="button" onClick={() => setIsUpgradeOpen(false)} className="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700">
-                {t('close')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* upgrade modal is provided globally by UpgradeModalProvider */}
 
       {isDebtDeleteOpen && debtToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
