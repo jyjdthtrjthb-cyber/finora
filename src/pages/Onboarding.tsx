@@ -60,13 +60,15 @@ export default function Onboarding() {
     const isValid = validateStep(1) && validateStep(2) && validateStep(3)
     if (!isValid) return
 
+    const preferredLocale = typeof window !== 'undefined' ? (window.localStorage.getItem('finora_lang') || 'ru') : 'ru'
+
     setLoading(true)
     try {
       await supabase.from('profiles').upsert({
         id: user.id,
         monthly_income: income || 0,
         monthly_savings: savings || 0,
-        preferred_locale: 'ru',
+        preferred_locale: preferredLocale,
         onboarding_completed: true
       }, { onConflict: 'id' })
 

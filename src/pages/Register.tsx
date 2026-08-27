@@ -18,6 +18,8 @@ export default function Register() {
     setError(null)
     if (password !== confirm) return setError(t('password_mismatch'))
 
+    const preferredLocale = typeof window !== 'undefined' ? (window.localStorage.getItem('finora_lang') || 'ru') : 'ru'
+
     setLoading(true)
     const redirectTo = `${window.location.origin}/`
 
@@ -44,7 +46,7 @@ export default function Register() {
           await supabase.from('profiles').upsert({
             id: userId,
             full_name: name,
-            preferred_locale: 'ru',
+            preferred_locale: preferredLocale,
             onboarding_completed: false
           }, { onConflict: 'id' })
         }
@@ -72,7 +74,7 @@ export default function Register() {
         await supabase.from('profiles').upsert({
           id: userId,
           full_name: name,
-          preferred_locale: 'ru',
+          preferred_locale: preferredLocale,
           onboarding_completed: false
         }, { onConflict: 'id' })
       }

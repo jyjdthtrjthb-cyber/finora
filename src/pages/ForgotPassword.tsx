@@ -13,7 +13,7 @@ export default function ForgotPassword() {
       redirectTo: window.location.origin + '/reset-password'
     })
     if (error) setMessage(error.message)
-    else setMessage('Check your email for reset instructions')
+    else setMessage(t('check_email_reset'))
   }
 
   return (
@@ -26,7 +26,7 @@ export default function ForgotPassword() {
         </div>
         {message && <div className="text-sm text-gray-700">{message}</div>}
         <div>
-          <button className="bg-finora text-white px-4 py-2 rounded">Send reset link</button>
+          <button className="bg-finora text-white px-4 py-2 rounded">{t('send_reset_link')}</button>
         </div>
       </form>
     </div>

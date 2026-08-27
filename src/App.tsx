@@ -8,8 +8,10 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import VerifyEmail from './pages/VerifyEmail'
 import Dashboard from './pages/Dashboard'
+import MoneyWisdom from './pages/MoneyWisdom'
 import { useAuth, AuthProvider } from './hooks/useAuth'
 import Onboarding from './pages/Onboarding'
+import { supabase } from './lib/supabase'
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { user, loading } = useAuth()
@@ -54,12 +56,20 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
 
 function AppRoutes() {
   const { t, i18n } = useTranslation()
-  const { subscriptionStatus } = useAuth()
+  const { user, subscriptionStatus } = useAuth()
 
-  const setLanguage = (lang: 'ru' | 'uz') => {
+  const setLanguage = async (lang: 'ru' | 'uz' | 'en') => {
     i18n.changeLanguage(lang)
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('finora_lang', lang)
+    }
+
+    if (user?.id) {
+      try {
+        await supabase.from('profiles').upsert({ id: user.id, preferred_locale: lang }, { onConflict: 'id' })
+      } catch (error) {
+        // ignore profile sync errors and keep the client preference
+      }
     }
   }
 
@@ -68,6 +78,7 @@ function AppRoutes() {
       <header className="p-6 flex flex-wrap items-center justify-between gap-3">
         <Link to="/" className="text-xl font-bold text-slate-900">{t('brand')}</Link>
         <nav className="flex items-center gap-3">
+          <Link to="/money-wisdom" className="text-sm text-gray-700">{t('money_wisdom')}</Link>
           <Link to="/login" className="text-sm text-gray-700">{t('login')}</Link>
           <Link to="/register" className="text-sm text-gray-700">{t('signup')}</Link>
           {subscriptionStatus === 'pro' && (
@@ -76,11 +87,14 @@ function AppRoutes() {
             </div>
           )}
           <div className="ml-2 inline-flex rounded-full border border-slate-200 bg-white p-1 shadow-sm">
-            <button type="button" onClick={() => setLanguage('ru')} className={`rounded-full px-2 py-1 text-xs font-semibold ${i18n.language.startsWith('ru') ? 'bg-slate-900 text-white' : 'text-slate-600'}`}>
+            <button type="button" onClick={() => void setLanguage('ru')} className={`rounded-full px-2 py-1 text-xs font-semibold ${i18n.language.startsWith('ru') ? 'bg-slate-900 text-white' : 'text-slate-600'}`}>
               RU
             </button>
-            <button type="button" onClick={() => setLanguage('uz')} className={`rounded-full px-2 py-1 text-xs font-semibold ${i18n.language.startsWith('uz') ? 'bg-slate-900 text-white' : 'text-slate-600'}`}>
+            <button type="button" onClick={() => void setLanguage('uz')} className={`rounded-full px-2 py-1 text-xs font-semibold ${i18n.language.startsWith('uz') ? 'bg-slate-900 text-white' : 'text-slate-600'}`}>
               UZ
+            </button>
+            <button type="button" onClick={() => void setLanguage('en')} className={`rounded-full px-2 py-1 text-xs font-semibold ${i18n.language.startsWith('en') ? 'bg-slate-900 text-white' : 'text-slate-600'}`}>
+              EN
             </button>
           </div>
         </nav>
@@ -88,6 +102,7 @@ function AppRoutes() {
       <main className="p-6">
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/money-wisdom" element={<MoneyWisdom />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
