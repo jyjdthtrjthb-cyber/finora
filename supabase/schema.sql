@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   avatar_url text,
   locale text DEFAULT 'ru',
   preferred_locale text DEFAULT 'ru',
-  plan text DEFAULT 'free', -- free | pro
-  subscription_status text DEFAULT 'free', -- free | pro
+  plan text DEFAULT 'free',
+  subscription_status text DEFAULT 'free',
   monthly_income numeric(14,2) DEFAULT 0,
   monthly_expenses numeric(14,2) DEFAULT 0,
   monthly_savings numeric(14,2) DEFAULT 0,
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS public.scenarios (
 CREATE TABLE IF NOT EXISTS public.subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
-  status text NOT NULL DEFAULT 'trial', -- trial | active | canceled | expired
+  status text NOT NULL DEFAULT 'trial',
   tier text DEFAULT 'pro',
   trial_start timestamptz,
   trial_end timestamptz,
@@ -124,25 +124,48 @@ ALTER TABLE IF EXISTS public.subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- Policies: allow authenticated users to manage their own rows
 -- Profiles: user owns their profile (id == auth.uid())
-CREATE POLICY IF NOT EXISTS "Profiles: owner" ON public.profiles
-FOR ALL
-USING (auth.uid() = id)
-WITH CHECK (auth.uid() = id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'profiles'
+      AND policyname = 'Profiles: owner'
+  ) THEN
+    CREATE POLICY "Profiles: owner" ON public.profiles
+    FOR ALL
+    USING (auth.uid() = id)
+    WITH CHECK (auth.uid() = id);
+  END IF;
+END $$;
 
 -- Generic policy for tables with user_id column
 DO $$
 DECLARE
   tbl text;
 BEGIN
-  FOR tbl IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename IN (
-    'expenses','budgets','savings','financial_goals','debts','child_funds','scenarios','subscriptions'
-  ) LOOP
-    EXECUTE format(
-      'CREATE POLICY IF NOT EXISTS "%I: owner" ON public.%I FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);',
-      tbl, tbl
-    );
+  FOR tbl IN
+    SELECT tablename
+    FROM pg_tables
+    WHERE schemaname = 'public'
+      AND tablename IN ('expenses', 'budgets', 'savings', 'financial_goals', 'debts', 'child_funds', 'scenarios', 'subscriptions')
+  LOOP
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_policies
+      WHERE schemaname = 'public'
+        AND tablename = tbl
+        AND policyname = tbl || ': owner'
+    ) THEN
+      EXECUTE format(
+        'CREATE POLICY "%I: owner" ON public.%I FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);',
+        tbl,
+        tbl
+      );
+    END IF;
   END LOOP;
-END$$;
+END $$;
 
 -- Useful indexes
 CREATE INDEX IF NOT EXISTS idx_expenses_user_date ON public.expenses (user_id, occurred_at);

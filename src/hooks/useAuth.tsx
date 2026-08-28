@@ -55,7 +55,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       trial_end: null
     }, { onConflict: 'id' })
 
-    return !error
+    if (!error) {
+      const refreshed = await refreshSubscription()
+      return refreshed === 'pro'
+    }
+
+    return false
   }
 
   useEffect(() => {

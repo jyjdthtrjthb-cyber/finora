@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useTranslation } from 'react-i18next'
+import { proFeatures } from '../data/proFeatures'
 
 function calcProjection(monthly: number, rate: number, years: number) {
   const months = years * 12
@@ -143,6 +144,29 @@ export default function Landing() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-[28px] border border-[#F8D66D]/30 bg-gradient-to-br from-[#111827] via-[#0F172A] to-[#1E293B] p-6 text-white shadow-[0_20px_50px_rgba(15,23,42,0.25)] md:p-8">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#FDE68A]">Finora Pro</p>
+            <h3 className="mt-2 text-3xl font-black text-white">{t('unlock_finora_pro')}</h3>
+            <div className="mt-2 text-2xl font-black text-[#FFD700]">{proFeatures.price}</div>
+            <div className="mt-1 text-sm text-slate-200">{t('seven_day_trial')}</div>
+          </div>
+          <a href="/login" className="inline-flex rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-3 text-sm font-black text-slate-900 shadow-[0_10px_30px_rgba(245,158,11,0.35)]">
+            {t('unlock_with_finora_pro')}
+          </a>
+        </div>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {proFeatures.features.map((feature) => (
+            <div key={feature.key} className="rounded-2xl border border-white/10 bg-white/5 p-3 text-sm text-slate-200">
+              <div className="text-lg">{feature.icon}</div>
+              <div className="mt-2 font-medium">{t(feature.key)}</div>
+            </div>
+          ))}
         </div>
       </section>
 

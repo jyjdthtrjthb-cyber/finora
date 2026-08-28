@@ -6,6 +6,7 @@ import { useUpgradeModal } from '../components/UpgradeModalProvider'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
+import { proFeatures } from '../data/proFeatures'
 
 type Goal = {
   id: number
@@ -702,9 +703,12 @@ export default function Dashboard() {
               </button>
 
               <div className="mt-6 space-y-3">
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-200">{t('goal_limit_pro')}</div>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-200">{t('feature_compound_interest_simulator')}</div>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-200">{t('feature_goal_predictor')}</div>
+                {proFeatures.features.map((feature) => (
+                  <div key={feature.key} className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-200">
+                    <span className="mr-2">{feature.icon}</span>
+                    {t(feature.key)}
+                  </div>
+                ))}
               </div>
             </aside>
           </div>
