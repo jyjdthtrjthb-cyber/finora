@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAuth } from '../hooks/useAuth'
 import MoneyWisdom from './MoneyWisdom'
+import TimeToFreedomPanel from '../components/TimeToFreedomPanel'
+import WhatIfPanel from '../components/WhatIfPanel'
 import { useUpgradeModal } from '../components/UpgradeModalProvider'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
@@ -16,7 +18,7 @@ type Goal = {
   monthly: number
 }
 
-type TabKey = 'home' | 'account' | 'goals' | 'calculators' | 'money_wisdom'
+type TabKey = 'home' | 'account' | 'goals' | 'calculators' | 'money_wisdom' | 'time_to_freedom' | 'what_if'
 
 type Debt = {
   id: string
@@ -161,9 +163,12 @@ export default function Dashboard() {
   }, [toast])
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.pathname === '/money-wisdom') {
-      setActiveTab('money_wisdom')
-    }
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname
+        if (path === '/money-wisdom') setActiveTab('money_wisdom')
+        if (path === '/time-to-freedom') setActiveTab('time_to_freedom')
+        if (path === '/what-if') setActiveTab('what_if')
+      }
 
     const storedProfile = (() => {
       if (typeof window === 'undefined') return null
@@ -334,10 +339,12 @@ export default function Dashboard() {
 
   const navTabs: Array<{ key: TabKey; label: string; icon: string }> = [
     { key: 'home', label: t('home_tab'), icon: '🏠' },
+    { key: 'calculators', label: t('calculators_tab'), icon: '🧮' },
     { key: 'account', label: t('account_tab'), icon: '👤' },
     { key: 'goals', label: t('goals_tab'), icon: '🎯' },
-    { key: 'calculators', label: t('calculators_tab'), icon: '🧮' },
-    { key: 'money_wisdom', label: t('money_wisdom'), icon: '💡' }
+    { key: 'money_wisdom', label: t('money_wisdom'), icon: '💡' },
+    { key: 'time_to_freedom', label: t('time_to_freedom'), icon: '⏳' },
+    { key: 'what_if', label: t('what_if'), icon: '🔮' }
   ]
 
   const persistGoals = (nextGoals: Goal[]) => {
@@ -753,6 +760,18 @@ export default function Dashboard() {
       {activeTab === 'money_wisdom' && (
         <div>
           <MoneyWisdom />
+        </div>
+      )}
+
+      {activeTab === 'time_to_freedom' && (
+        <div>
+          <TimeToFreedomPanel />
+        </div>
+      )}
+
+      {activeTab === 'what_if' && (
+        <div>
+          <WhatIfPanel />
         </div>
       )}
 

@@ -123,6 +123,8 @@ function AppRoutes() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/time-to-freedom" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/what-if" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         </Routes>
       </main>
     </div>
