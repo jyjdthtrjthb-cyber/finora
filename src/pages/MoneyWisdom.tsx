@@ -333,12 +333,91 @@ function RuleCalculator({ rule, lang }: { rule: FinancialRule; lang: 'en' | 'ru'
 
 export default function MoneyWisdom() {
   const { t, i18n } = useTranslation()
-  const { subscriptionStatus } = useAuth()
+  const { subscriptionStatus, loading } = useAuth()
   const { openUpgrade } = useUpgradeModal()
   const lang = getLangKey(i18n.language || 'en') as 'en' | 'ru' | 'uz'
   const isPro = subscriptionStatus === 'pro'
 
   const sortedRules = useMemo(() => [...financialRules], [])
+
+  if (loading) return <div className="p-6">{t('checking_promo') || 'Loading Money Wisdom...'}</div>
+
+  const renderRules = () => {
+    try {
+      return sortedRules.map((rule) => {
+        const isLocked = rule.isPro && !isPro
+        const previewText = (rule.teaser && rule.teaser[lang]) || getLocalized(rule, 'shortDescription', lang)
+        const mainTitle = getLocalized(rule, 'title', lang)
+
+        return (
+          <article key={rule.id} className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.05)] md:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-[#FFF8D6] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-[#7C4A00]">{rule.isPro ? 'PRO' : 'FREE'}</span>
+                  <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">#{rule.id}</span>
+                </div>
+                <h2 className="mt-3 text-2xl font-black text-slate-900">{mainTitle}</h2>
+              </div>
+              <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">{rule.category}</div>
+            </div>
+
+            {isLocked ? (
+              <div className="mt-5 rounded-2xl border border-[#F8D66D]/40 bg-[#FFFDF1] p-5">
+                <div className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#FDE68A]">🔒 PRO</div>
+                <p className="mt-3 text-lg font-bold text-slate-900">{mainTitle}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{previewText}</p>
+                <button type="button" onClick={() => openUpgrade({ featureTitle: mainTitle })} className="mt-4 rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-2 text-sm font-bold text-slate-900 shadow-[0_10px_30px_rgba(245,158,11,0.35)]">
+                  {t('unlock_with_finora_pro')}
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="mt-4 text-base leading-7 text-slate-700">{getLocalized(rule, 'shortDescription', lang)}</p>
+
+                <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t('rule_formula')}</div>
+                    <div className="mt-2 text-base font-semibold text-slate-900">{getLocalized(rule, 'formula', lang)}</div>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t('rule_source')}</div>
+                    <div className="mt-2 text-base font-semibold text-slate-900">{getLocalized(rule, 'source', lang)}</div>
+                  </div>
+                </div>
+
+                <div className="mt-5 space-y-4 text-slate-700">
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t('rule_explanation')}</div>
+                    <p className="mt-2 leading-7">{getLocalized(rule, 'fullExplanation', lang)}</p>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t('rule_example')}</div>
+                    <p className="mt-2 leading-7">{getLocalized(rule, 'example', lang)}</p>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t('rule_why_it_matters')}</div>
+                    <p className="mt-2 leading-7">{getLocalized(rule, 'whyItMatters', lang)}</p>
+                  </div>
+                </div>
+
+                {rule.interactiveAction && <RuleCalculator rule={rule} lang={lang} />}
+              </>
+            )}
+          </article>
+        )
+      })
+    } catch (err) {
+      // Log and return a safe error UI so the whole page doesn't go blank
+      // eslint-disable-next-line no-console
+      console.error('MoneyWisdom render error', err)
+      return (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-700">
+          {t('pro_required')}: {t('pro_required_desc')}
+        </div>
+      )
+    }
+  }
 
   return (
     <div className="mx-auto max-w-7xl py-6 md:py-10">
@@ -348,71 +427,7 @@ export default function MoneyWisdom() {
         <p className="mt-4 max-w-3xl text-base text-slate-300 md:text-lg">{t('money_wisdom_subtitle')}</p>
       </div>
 
-      <div className="space-y-6">
-        {sortedRules.map((rule) => {
-          const isLocked = rule.isPro && !isPro
-          const previewText = rule.teaser?.[lang] || rule.shortDescription[lang]
-          const mainTitle = rule.title[lang]
-
-          return (
-            <article key={rule.id} className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.05)] md:p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-[#FFF8D6] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-[#7C4A00]">{rule.isPro ? 'PRO' : 'FREE'}</span>
-                    <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">#{rule.id}</span>
-                  </div>
-                  <h2 className="mt-3 text-2xl font-black text-slate-900">{mainTitle}</h2>
-                </div>
-                <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">{rule.category}</div>
-              </div>
-
-                  {isLocked ? (
-                <div className="mt-5 rounded-2xl border border-[#F8D66D]/40 bg-[#FFFDF1] p-5">
-                  <div className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#FDE68A]">🔒 PRO</div>
-                  <p className="mt-3 text-lg font-bold text-slate-900">{mainTitle}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{previewText}</p>
-                  <button type="button" onClick={() => openUpgrade({ featureTitle: rule.title[lang] })} className="mt-4 rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-2 text-sm font-bold text-slate-900 shadow-[0_10px_30px_rgba(245,158,11,0.35)]">
-                    {t('unlock_with_finora_pro')}
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <p className="mt-4 text-base leading-7 text-slate-700">{rule.shortDescription[lang]}</p>
-
-                  <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t('rule_formula')}</div>
-                      <div className="mt-2 text-base font-semibold text-slate-900">{rule.formula[lang]}</div>
-                    </div>
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t('rule_source')}</div>
-                      <div className="mt-2 text-base font-semibold text-slate-900">{rule.source[lang]}</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 space-y-4 text-slate-700">
-                    <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t('rule_explanation')}</div>
-                      <p className="mt-2 leading-7">{rule.fullExplanation[lang]}</p>
-                    </div>
-                    <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t('rule_example')}</div>
-                      <p className="mt-2 leading-7">{rule.example[lang]}</p>
-                    </div>
-                    <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t('rule_why_it_matters')}</div>
-                      <p className="mt-2 leading-7">{rule.whyItMatters[lang]}</p>
-                    </div>
-                  </div>
-
-                  {rule.interactiveAction && <RuleCalculator rule={rule} lang={lang} />}
-                </>
-              )}
-            </article>
-          )
-        })}
-      </div>
+      <div className="space-y-6">{renderRules()}</div>
 
       {/* Upgrade modal is provided globally by UpgradeModalProvider */}
     </div>
