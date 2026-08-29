@@ -161,6 +161,10 @@ export default function Dashboard() {
   }, [toast])
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.pathname === '/money-wisdom') {
+      setActiveTab('money_wisdom')
+    }
+
     const storedProfile = (() => {
       if (typeof window === 'undefined') return null
       try {
@@ -691,11 +695,12 @@ export default function Dashboard() {
               </div>
             </section>
 
+            {!isPro && (
             <aside className="rounded-[28px] border border-[#F8D66D]/30 bg-gradient-to-br from-[#111827] via-[#0F172A] to-[#1E293B] p-5 text-white shadow-[0_20px_50px_rgba(15,23,42,0.2)]">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#FDE68A]">{t('pro')}</p>
               <h3 className="mt-2 text-2xl font-black text-white">{t('golden_pro')}</h3>
               <div className="mt-4 rounded-2xl border border-[#FFD700]/20 bg-[#FFD700]/10 p-4 text-center">
-                <div className="text-3xl font-black text-[#FFD700]">100 000 UZS</div>
+                <div className="text-3xl font-black text-[#FFD700]">79 000 UZS</div>
                 <div className="mt-1 text-sm text-slate-200">{t('per_month')}</div>
               </div>
               <button type="button" onClick={() => openUpgrade()} className="mt-5 w-full rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-3 text-base font-black text-slate-900">
@@ -711,6 +716,7 @@ export default function Dashboard() {
                 ))}
               </div>
             </aside>
+            )}
           </div>
         </>
       )}

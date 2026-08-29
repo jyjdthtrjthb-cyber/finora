@@ -8,7 +8,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import VerifyEmail from './pages/VerifyEmail'
 import Dashboard from './pages/Dashboard'
-import MoneyWisdom from './pages/MoneyWisdom'
+// MoneyWisdom is accessible inside the authenticated Dashboard; no public Money Wisdom page
 import { useAuth, AuthProvider } from './hooks/useAuth'
 import { UpgradeModalProvider } from './components/UpgradeModalProvider'
 import Onboarding from './pages/Onboarding'
@@ -57,7 +57,7 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
 
 function AppRoutes() {
   const { t, i18n } = useTranslation()
-  const { user, subscriptionStatus } = useAuth()
+  const { user, subscriptionStatus, signOut } = useAuth()
 
   const setLanguage = async (lang: 'ru' | 'uz' | 'en') => {
     i18n.changeLanguage(lang)
@@ -79,9 +79,21 @@ function AppRoutes() {
       <header className="p-6 flex flex-wrap items-center justify-between gap-3">
         <Link to="/" className="text-xl font-bold text-slate-900">{t('brand')}</Link>
         <nav className="flex items-center gap-3">
-          <Link to="/money-wisdom" className="text-sm text-gray-700">{t('money_wisdom')}</Link>
-          <Link to="/login" className="text-sm text-gray-700">{t('login')}</Link>
-          <Link to="/register" className="text-sm text-gray-700">{t('signup')}</Link>
+          {!user && (
+            <>
+              <Link to="/login" className="text-sm text-gray-700">{t('login')}</Link>
+              <Link to="/register" className="text-sm text-gray-700">{t('signup')}</Link>
+            </>
+          )}
+          {user && (
+            <>
+              <Link to="/dashboard" className="text-sm text-gray-700">{t('dashboard')}</Link>
+              <button type="button" onClick={async () => { await signOut(); window.location.href = '/' }} className="text-sm text-gray-700">
+                {t('logout')}
+              </button>
+            </>
+          )}
+
           {subscriptionStatus === 'pro' && (
             <div className="rounded-full border border-[#D4AF37] bg-[#FFF8D6] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#7C4A00] shadow-[0_8px_20px_rgba(212,175,55,0.4)]">
               FINORA PRO
@@ -103,7 +115,7 @@ function AppRoutes() {
       <main className="p-6">
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/money-wisdom" element={<MoneyWisdom />} />
+          <Route path="/money-wisdom" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

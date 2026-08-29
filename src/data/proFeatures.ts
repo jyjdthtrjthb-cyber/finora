@@ -4,8 +4,8 @@ export type ProFeatureItem = {
 }
 
 export const proFeatures = {
-  price: '100,000 UZS / month',
-  priceRu: '100 000 UZS / месяц',
+  price: '79,000 UZS / month',
+  priceRu: '79 000 UZS / месяц',
   trial: '7-day free trial',
   trialRu: '7-дневная бесплатная пробная версия',
   headline: 'Finora Pro',
@@ -32,7 +32,7 @@ export const getProPlanCopy = (lang: 'en' | 'ru' | 'uz' = 'en') => {
   if (lang === 'ru') {
     return {
       headline: 'Finora Pro',
-      price: '100 000 UZS / месяц',
+      price: '79 000 UZS / месяц',
       trial: '7-дневная бесплатная пробная версия',
       freeTitle: 'Бесплатно',
       proTitle: 'Pro',
@@ -45,7 +45,7 @@ export const getProPlanCopy = (lang: 'en' | 'ru' | 'uz' = 'en') => {
   if (lang === 'uz') {
     return {
       headline: 'Finora Pro',
-      price: '100 000 UZS / oy',
+      price: '79 000 UZS / oy',
       trial: '7 kunlik bepul sinov',
       freeTitle: 'Bepul',
       proTitle: 'Pro',
@@ -57,7 +57,7 @@ export const getProPlanCopy = (lang: 'en' | 'ru' | 'uz' = 'en') => {
 
   return {
     headline: 'Finora Pro',
-    price: '100,000 UZS / month',
+    price: '79,000 UZS / month',
     trial: '7-day free trial',
     freeTitle: 'Free',
     proTitle: 'Pro',
