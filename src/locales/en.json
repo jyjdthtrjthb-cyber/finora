@@ -233,6 +233,14 @@
   "rule_example": "Example",
   "rule_why_it_matters": "Why it matters",
   "unlock_with_finora_pro": "Unlock with Finora Pro",
+  "apply_in_finora": "Apply in Finora",
+  "calculate_fee_impact": "Calculate Fee Impact",
+  "assign_my_money": "Assign My Money",
+  "check_allocation": "Check Allocation",
+  "calculate_regular_investing": "Calculate Regular Investing",
+  "apply_to_debt_calculator": "Apply to Debt Calculator",
+  "calculate_debt_payoff": "Calculate Debt Payoff",
+  "calculate_before_buying": "Calculate Before Buying",
   "unlock_finora_pro": "Unlock Finora Pro",
   "pro_feature": "Pro feature",
   "start_7_day_trial": "Start 7-Day Trial",
@@ -258,7 +266,7 @@
   "pro_feature_long_term": "Long-Term Financial Projections",
   "pro_comparison": "Free vs Pro",
   "free_list": "Basic dashboard · Income & expense tracking · Basic calculations · Up to 5 goals · Money Wisdom rules 1–10",
-  "pro_list": "Everything in Free, plus up to 15 goals · Debt management · Bank growth · Child fund · Multiple currencies · Business ROI · Advanced analytics · What-if scenarios · Long-term projections · Money Wisdom rules 11–20",
+  "pro_list": "Everything in Free, plus up to 15 goals · Debt management · Bank growth · Child fund · Multiple currencies · Business ROI · Advanced analytics · What-if scenarios · Long-term projections · Money Wisdom rules 11–30",
   "pro_contact_note": "To purchase Pro, contact the owner via Telegram or phone. Manual purchase is required.",
   "promo_server_missing": "Promo validation not available — please ask the admin to enable server-side promo validation."
 }
