@@ -83,14 +83,20 @@ export default function Onboarding() {
 
     setLoading(true)
     try {
-      await supabase.from('profiles').upsert({
-        id: user.id,
-        currency: currency,
-        monthly_income: income || 0,
-        monthly_savings: savings || 0,
-        preferred_locale: preferredLocale,
-        onboarding_completed: true
-      }, { onConflict: 'id' })
+      // attempt to persist to Supabase, but do not block onboarding if any DB operation fails
+      try {
+        const { error } = await supabase.from('profiles').upsert({
+          id: user.id,
+          currency: currency,
+          monthly_income: income || 0,
+          monthly_savings: savings || 0,
+          preferred_locale: preferredLocale,
+          onboarding_completed: true
+        }, { onConflict: 'id' })
+        if (error) console.warn('Onboarding: profiles.upsert error', error)
+      } catch (err) {
+        console.warn('Onboarding: profiles.upsert failed', err)
+      }
 
       const month = new Date().toISOString().slice(0, 10)
       const budgetRows = Object.entries(spending).map(([category, amount]) => ({
@@ -99,23 +105,20 @@ export default function Onboarding() {
         category,
         planned: amount
       }))
-      if (budgetRows.length) await supabase.from('budgets').insert(budgetRows)
+      if (budgetRows.length) {
+        try { await supabase.from('budgets').insert(budgetRows) } catch (err) { console.warn('Onboarding: budgets.insert failed', err) }
+      }
 
-      await supabase.from('savings').upsert({ user_id: user.id, monthly_contribution: savings || 0 }, { onConflict: 'user_id' })
-      await supabase.from('financial_goals').insert({
-        user_id: user.id,
-        name: goal,
-        target_amount: 0,
-        current_amount: 0,
-        monthly_contribution: savings || 0
-      })
+      try { await supabase.from('savings').upsert({ user_id: user.id, monthly_contribution: savings || 0 }, { onConflict: 'user_id' }) } catch (err) { console.warn('Onboarding: savings.upsert failed', err) }
+      try { await supabase.from('financial_goals').insert({ user_id: user.id, name: goal, target_amount: 0, current_amount: 0, monthly_contribution: savings || 0 }) } catch (err) { console.warn('Onboarding: financial_goals.insert failed', err) }
 
+      // persist locally and continue regardless of DB errors
       persistOnboarding()
       setLoading(false)
       navigate('/dashboard', { replace: true })
-    } catch (e: any) {
+    } finally {
+      // ensure loading is turned off if something unexpected happens
       setLoading(false)
-      setError(e?.message || 'Failed')
     }
   }
 
@@ -196,16 +199,16 @@ export default function Onboarding() {
                     if (user?.id) {
                       const { error } = await supabase.from('profiles').upsert({ id: user.id, currency: currency }, { onConflict: 'id' })
                       if (error) {
+                        // non-blocking: show error but allow onboarding to continue
                         setError(error.message)
-                        return
                       }
                     }
                     // update global currency immediately
                     try { await setGlobalCurrency(currency) } catch { /* ignore */ }
                     if (typeof window !== 'undefined') window.localStorage.setItem('finora_currency', currency)
                   } catch (e: any) {
-                    setError(e?.message || 'Failed')
-                    return
+                    // non-blocking: store locally and continue
+                    if (typeof window !== 'undefined') window.localStorage.setItem('finora_currency', currency)
                   }
                 }
                 next()

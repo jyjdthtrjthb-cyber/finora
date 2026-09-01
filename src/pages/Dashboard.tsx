@@ -190,7 +190,7 @@ export default function Dashboard() {
           monthly_expenses: String(storedProfile.monthly_expenses ?? 0),
           savings_target: String(storedProfile.savings_target ?? storedProfile.monthly_savings ?? 0),
           bank_yield_rate: String(storedProfile.bank_yield_rate ?? storedProfile.bank_annual_yield ?? 19),
-          currency: storedProfile.currency ?? storedProfile.currency_preference ?? 'UZS'
+          currency: storedProfile.currency ?? 'UZS'
         })
       }
       return
@@ -205,7 +205,7 @@ export default function Dashboard() {
           monthly_expenses: res.data.monthly_expenses ?? storedProfile?.monthly_expenses ?? 0,
           savings_target: res.data.savings_target ?? res.data.monthly_savings ?? storedProfile?.savings_target ?? storedProfile?.monthly_savings ?? 0,
           bank_yield_rate: res.data.bank_yield_rate ?? res.data.bank_annual_yield ?? storedProfile?.bank_yield_rate ?? 19,
-          currency: res.data.currency ?? res.data.currency_preference ?? storedProfile?.currency ?? storedProfile?.currency_preference ?? 'UZS'
+          currency: res.data.currency ?? storedProfile?.currency ?? 'UZS'
         }
         setProfile(mergedProfile)
         setAccountDraft({
@@ -213,7 +213,7 @@ export default function Dashboard() {
           monthly_expenses: String(mergedProfile.monthly_expenses ?? 0),
           savings_target: String(mergedProfile.savings_target ?? mergedProfile.monthly_savings ?? 0),
           bank_yield_rate: String(mergedProfile.bank_yield_rate ?? mergedProfile.bank_annual_yield ?? 19),
-          currency: mergedProfile.currency ?? mergedProfile.currency_preference ?? 'UZS'
+          currency: mergedProfile.currency ?? 'UZS'
         })
         if (typeof window !== 'undefined') {
           window.localStorage.setItem('finora_user_profile', JSON.stringify(mergedProfile))
@@ -225,7 +225,7 @@ export default function Dashboard() {
           monthly_expenses: String(storedProfile.monthly_expenses ?? 0),
           savings_target: String(storedProfile.savings_target ?? storedProfile.monthly_savings ?? 0),
           bank_yield_rate: String(storedProfile.bank_yield_rate ?? storedProfile.bank_annual_yield ?? 19),
-          currency: storedProfile.currency ?? storedProfile.currency_preference ?? 'UZS'
+          currency: storedProfile.currency ?? 'UZS'
         })
       }
     })
@@ -525,7 +525,7 @@ export default function Dashboard() {
     }
 
     // If currency changed, confirm with the user (no automatic conversion)
-    if ((profile?.currency || profile?.currency_preference) && (profile.currency ?? profile.currency_preference) !== payload.currency) {
+    if ((profile?.currency ?? 'UZS') !== payload.currency) {
       const ok = typeof window !== 'undefined' ? window.confirm(t('change_currency_confirm_body')) : true
       if (!ok) {
         setIsAccountModalOpen(false)
