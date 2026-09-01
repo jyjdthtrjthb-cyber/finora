@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { formatMoney as libFormatMoney } from '../lib/currency'
+import { useCurrency } from '../context/CurrencyContext'
 import { useAuth } from '../hooks/useAuth'
 import MoneyWisdom from './MoneyWisdom'
 import BadHabitPanel from '../components/BadHabitPanel'
@@ -49,9 +51,7 @@ function calculateCompoundProjection(initialDeposit: number, monthlyInvestment: 
   }
 }
 
-function formatMoney(value: number) {
-  return Number(value || 0).toLocaleString('ru-RU')
-}
+// use centralized formatter via libFormatMoney inside component
 
 function getGoalProgress(goal: Goal) {
   if (goal.target <= 0) return 0
@@ -74,6 +74,7 @@ export default function Dashboard() {
   const { t, i18n } = useTranslation()
   const [activeTab, setActiveTab] = useState<TabKey>('home')
   const [profile, setProfile] = useState<any>(null)
+  const { currency } = useCurrency()
   // upgrade modal is provided by UpgradeModalProvider
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false)
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
@@ -523,6 +524,15 @@ export default function Dashboard() {
       return
     }
 
+    // If currency changed, confirm with the user (no automatic conversion)
+    if (profile?.currency_preference && profile.currency_preference !== payload.currency_preference) {
+      const ok = typeof window !== 'undefined' ? window.confirm(t('change_currency_confirm_body')) : true
+      if (!ok) {
+        setIsAccountModalOpen(false)
+        return
+      }
+    }
+
     setSavingAccount(true)
 
     try {
@@ -530,6 +540,7 @@ export default function Dashboard() {
         id: user.id,
         monthly_income: payload.monthly_income,
         monthly_expenses: payload.monthly_expenses,
+        currency_preference: payload.currency_preference,
         monthly_savings: payload.savings_target,
         bank_annual_yield: payload.bank_yield_rate
       }, { onConflict: 'id' })
@@ -610,13 +621,13 @@ export default function Dashboard() {
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('monthly_income')}</div>
               <div className="mt-3 text-2xl font-black text-slate-900">
-                {formatMoney(Number(profile?.monthly_income || 0))} <span className="text-sm font-medium text-slate-500">UZS</span>
+                {libFormatMoney(Number(profile?.monthly_income || 0), currency)}
               </div>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('monthly_expenses')}</div>
               <div className="mt-3 text-2xl font-black text-slate-900">
-                {formatMoney(Number(profile?.monthly_expenses || 0))} <span className="text-sm font-medium text-slate-500">UZS</span>
+                {libFormatMoney(Number(profile?.monthly_expenses || 0), currency)}
               </div>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -639,15 +650,15 @@ export default function Dashboard() {
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="rounded-2xl bg-slate-50 p-4">
                   <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('needs')}</div>
-                  <div className="mt-2 text-xl font-black text-slate-900">{formatMoney((Number(profile?.monthly_income || 0) * 0.5))} UZS</div>
+                  <div className="mt-2 text-xl font-black text-slate-900">{libFormatMoney((Number(profile?.monthly_income || 0) * 0.5), currency)}</div>
                 </div>
                 <div className="rounded-2xl bg-slate-50 p-4">
                   <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('wants')}</div>
-                  <div className="mt-2 text-xl font-black text-slate-900">{formatMoney((Number(profile?.monthly_income || 0) * 0.3))} UZS</div>
+                  <div className="mt-2 text-xl font-black text-slate-900">{libFormatMoney((Number(profile?.monthly_income || 0) * 0.3), currency)}</div>
                 </div>
                 <div className="rounded-2xl bg-[#FFF8D6] p-4">
                   <div className="text-xs uppercase tracking-[0.18em] text-[#7C4A00]">{t('wealth_savings')}</div>
-                  <div className="mt-2 text-xl font-black text-[#7C4A00]">{formatMoney((Number(profile?.monthly_income || 0) * 0.2))} UZS</div>
+                  <div className="mt-2 text-xl font-black text-[#7C4A00]">{libFormatMoney((Number(profile?.monthly_income || 0) * 0.2), currency)}</div>
                 </div>
               </div>
 
@@ -696,7 +707,7 @@ export default function Dashboard() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                     <XAxis dataKey="year" stroke="#64748b" />
                     <YAxis stroke="#64748b" />
-                    <Tooltip formatter={(value: number) => `${formatMoney(Number(value))} UZS`} />
+                    <Tooltip formatter={(value: number) => `${libFormatMoney(Number(value), currency)}`} />
                     <Bar dataKey="contributions" fill="#94a3b8" radius={[8, 8, 0, 0]} />
                     <Bar dataKey="interest" fill="#D4AF37" radius={[8, 8, 0, 0]} />
                   </BarChart>
@@ -745,15 +756,15 @@ export default function Dashboard() {
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('monthly_income')}</div>
-              <div className="mt-2 text-2xl font-black text-slate-900">{formatMoney(Number(profile?.monthly_income || 0))} UZS</div>
+              <div className="mt-2 text-2xl font-black text-slate-900">{libFormatMoney(Number(profile?.monthly_income || 0), currency)}</div>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('total_expenses')}</div>
-              <div className="mt-2 text-2xl font-black text-slate-900">{formatMoney(Number(profile?.monthly_expenses || 0))} UZS</div>
+              <div className="mt-2 text-2xl font-black text-slate-900">{libFormatMoney(Number(profile?.monthly_expenses || 0), currency)}</div>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('monthly_savings_target')}</div>
-              <div className="mt-2 text-2xl font-black text-slate-900">{formatMoney(Number(profile?.monthly_savings || 0))} UZS</div>
+              <div className="mt-2 text-2xl font-black text-slate-900">{libFormatMoney(Number(profile?.monthly_savings || 0), currency)}</div>
             </div>
           </div>
         </div>
@@ -816,7 +827,7 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <div className="text-lg font-bold text-slate-900">{goal.name}</div>
-                      <div className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">{formatMoney(goal.monthly)} UZS / {t('month')}</div>
+                      <div className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">{libFormatMoney(goal.monthly, currency)} / {t('month')}</div>
                     </div>
                     <div className="text-sm font-semibold text-[#B7791F]">{progress.toFixed(0)}%</div>
                   </div>
@@ -824,8 +835,8 @@ export default function Dashboard() {
                     <div className="h-full rounded-full bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37]" style={{ width: `${progress}%` }} />
                   </div>
                   <div className="mt-3 flex items-center justify-between text-sm text-slate-600">
-                    <span>{formatMoney(goal.current)} UZS</span>
-                    <span>{formatMoney(goal.target)} UZS</span>
+                    <span>{libFormatMoney(goal.current, currency)}</span>
+                    <span>{libFormatMoney(goal.target, currency)}</span>
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-3">
                     <span className="text-xs uppercase tracking-[0.18em] text-slate-500">{countdown.text}</span>
@@ -883,11 +894,11 @@ export default function Dashboard() {
                 <div className="mt-6 grid gap-4 md:grid-cols-3">
                   <div className="rounded-2xl bg-slate-50 p-4">
                     <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('converted_total_uzs')}</div>
-                    <div className="mt-2 text-2xl font-black text-slate-900">{formatMoney(Number((Number(portfolio.uzs) + Number(portfolio.usd) * 12800 + Number(portfolio.eur) * 13800 + Number(portfolio.rub) * 155).toFixed(0)))} UZS</div>
+                    <div className="mt-2 text-2xl font-black text-slate-900">{libFormatMoney(Number((Number(portfolio.uzs) + Number(portfolio.usd) * 12800 + Number(portfolio.eur) * 13800 + Number(portfolio.rub) * 155).toFixed(0)), currency)}</div>
                   </div>
                   <div className="rounded-2xl bg-slate-50 p-4">
                     <div className="text-xs uppercase tracking-[0.18em] text-slate-500">USD</div>
-                    <div className="mt-2 text-2xl font-black text-slate-900">{formatMoney(Number(portfolio.usd) * 12800)} UZS</div>
+                    <div className="mt-2 text-2xl font-black text-slate-900">{libFormatMoney(Number(portfolio.usd) * 12800, currency)}</div>
                   </div>
                   <div className="rounded-2xl bg-[#FFF8D6] p-4">
                     <div className="text-xs uppercase tracking-[0.18em] text-[#7C4A00]">{t('hedge_status')}</div>
@@ -905,8 +916,8 @@ export default function Dashboard() {
                       return (
                         <div key={year} className="rounded-2xl bg-white p-4 shadow-sm">
                           <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{year} {t('years')}</div>
-                          <div className="mt-2 text-sm text-slate-700">UZS: {formatMoney(uzsPower)} UZS</div>
-                          <div className="mt-1 text-sm text-slate-700">USD: {formatMoney(usdPower)} UZS</div>
+                          <div className="mt-2 text-sm text-slate-700">UZS: {libFormatMoney(uzsPower, currency)}</div>
+                          <div className="mt-1 text-sm text-slate-700">USD: {libFormatMoney(usdPower, currency)}</div>
                         </div>
                       )
                     })}
@@ -942,7 +953,7 @@ export default function Dashboard() {
                   <div className="rounded-2xl bg-slate-50 p-4">
                     <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('break_even_point')}</div>
                     <div className="mt-2 text-2xl font-black text-slate-900">
-                      {formatMoney(Math.max(0, Number(businessModel.fixedExpenses) / Math.max(Number(businessModel.avgProfit), 1)))} {t('sales_per_month')}
+                      {libFormatMoney(Math.max(0, Number(businessModel.fixedExpenses) / Math.max(Number(businessModel.avgProfit), 1)), currency)} {t('sales_per_month')}
                     </div>
                   </div>
                   <div className="rounded-2xl bg-[#FFF8D6] p-4">
@@ -1002,7 +1013,7 @@ export default function Dashboard() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                       <XAxis dataKey="name" stroke="#64748b" />
                       <YAxis stroke="#64748b" />
-                      <Tooltip formatter={(value: number) => `${formatMoney(Number(value))} UZS`} />
+                      <Tooltip formatter={(value: number) => `${libFormatMoney(Number(value), currency)}`} />
                       <Bar dataKey="standard" fill="#94a3b8" radius={[8,8,0,0]} />
                       <Bar dataKey="fast" fill="#D4AF37" radius={[8,8,0,0]} />
                     </BarChart>
@@ -1010,7 +1021,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="mt-5 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">
-                  {t('interest_saved_summary', { amount: formatMoney(Math.max(0, ((Number(debtSpeedup.totalLoan) * Number(debtSpeedup.annualRate) / 100) / 12) * 0.3)) })}
+                  {t('interest_saved_summary', { amount: libFormatMoney(Math.max(0, ((Number(debtSpeedup.totalLoan) * Number(debtSpeedup.annualRate) / 100) / 12) * 0.3), currency) })}
                 </div>
               </section>
             </>
@@ -1043,15 +1054,15 @@ export default function Dashboard() {
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl bg-slate-100 p-4">
                 <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('contributions')}</div>
-                <div className="mt-2 text-xl font-black text-slate-900">{formatMoney(currentProjection.contributions)} UZS</div>
+                <div className="mt-2 text-xl font-black text-slate-900">{libFormatMoney(currentProjection.contributions, currency)}</div>
               </div>
               <div className="rounded-2xl bg-slate-100 p-4">
                 <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('interest_earned')}</div>
-                <div className="mt-2 text-xl font-black text-[#B7791F]">{formatMoney(currentProjection.interest)} UZS</div>
+                <div className="mt-2 text-xl font-black text-[#B7791F]">{libFormatMoney(currentProjection.interest, currency)}</div>
               </div>
               <div className="rounded-2xl bg-[#FFF8D6] p-4">
                 <div className="text-xs uppercase tracking-[0.18em] text-[#7C4A00]">{t('final_amount')}</div>
-                <div className="mt-2 text-xl font-black text-[#7C4A00]">{formatMoney(currentProjection.total)} UZS</div>
+                <div className="mt-2 text-xl font-black text-[#7C4A00]">{libFormatMoney(currentProjection.total, currency)}</div>
               </div>
             </div>
 
@@ -1061,7 +1072,7 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="year" stroke="#64748b" />
                   <YAxis stroke="#64748b" />
-                  <Tooltip formatter={(value: number) => `${formatMoney(Number(value))} UZS`} />
+                  <Tooltip formatter={(value: number) => `${libFormatMoney(Number(value), currency)}`} />
                   <Bar dataKey="contributions" fill="#94a3b8" radius={[8,8,0,0]} />
                   <Bar dataKey="interest" fill="#D4AF37" radius={[8,8,0,0]} />
                 </BarChart>
@@ -1106,7 +1117,7 @@ export default function Dashboard() {
             {isPro && (
               <div className="mt-6 rounded-2xl bg-[#FFF8D6] p-4">
                 <div className="text-sm font-medium uppercase tracking-[0.18em] text-[#7C4A00]">{t('projected_total')}</div>
-                <div className="mt-2 text-3xl font-black text-slate-900">{formatMoney(childProjection.total)} UZS</div>
+                <div className="mt-2 text-3xl font-black text-slate-900">{libFormatMoney(childProjection.total, currency)}</div>
               </div>
             )}
           </section>
@@ -1167,8 +1178,8 @@ export default function Dashboard() {
                     </div>
 
                     <div className="mt-3 flex items-center justify-between text-sm text-slate-600">
-                      <span>{formatMoney(debt.remaining)} UZS</span>
-                      <span>{formatMoney(debt.total)} UZS</span>
+                      <span>{libFormatMoney(debt.remaining, currency)}</span>
+                      <span>{libFormatMoney(debt.total, currency)}</span>
                     </div>
 
                     <div className="mt-4 flex items-center justify-between gap-3">
@@ -1193,7 +1204,7 @@ export default function Dashboard() {
             <div className="mt-6 rounded-2xl bg-slate-50 p-4">
               <div className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">{t('payoff_estimate')}</div>
               <div className="mt-2 text-2xl font-black text-slate-900">{debtOutcome.months} {t('months')}</div>
-              <div className="mt-1 text-sm text-slate-600">{formatMoney(debtOutcome.totalPaid)} UZS</div>
+              <div className="mt-1 text-sm text-slate-600">{libFormatMoney(debtOutcome.totalPaid, currency)}</div>
             </div>
           </section>
         </div>

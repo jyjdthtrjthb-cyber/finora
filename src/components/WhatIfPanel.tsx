@@ -2,10 +2,8 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { seriesFutureValues, futureValueMonthly } from '../lib/opportunityCost'
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from 'recharts'
-
-function formatMoney(value: number) {
-  return Number(value || 0).toLocaleString('ru-RU')
-}
+import { useCurrency } from '../context/CurrencyContext'
+import { formatMoney as libFormatMoney } from '../lib/currency'
 
 export default function WhatIfPanel() {
   const { t } = useTranslation()
@@ -87,7 +85,7 @@ export default function WhatIfPanel() {
 
           <div>
             <label className="block text-sm text-slate-700">{t('monthly_equivalent')}</label>
-            <div className="mt-2 text-xl font-black text-slate-900">{formatMoney(Math.round(monthlyEquivalent))} UZS</div>
+            <div className="mt-2 text-xl font-black text-slate-900">{libFormatMoney(Math.round(monthlyEquivalent), currency)}</div>
           </div>
 
           <div>
@@ -101,15 +99,15 @@ export default function WhatIfPanel() {
         <div className="grid gap-3 md:grid-cols-3">
           <div>
             <div className="text-xs text-slate-500">{t('total_spent')}</div>
-            <div className="mt-1 text-2xl font-black text-slate-900">{formatMoney(Math.round(totalSpent))} UZS</div>
+            <div className="mt-1 text-2xl font-black text-slate-900">{libFormatMoney(Math.round(totalSpent), currency)}</div>
           </div>
           <div>
             <div className="text-xs text-slate-500">{t('future_value')}</div>
-            <div className="mt-1 text-2xl font-black text-[#7C4A00]">{formatMoney(Math.round(futureValue))} UZS</div>
+            <div className="mt-1 text-2xl font-black text-[#7C4A00]">{libFormatMoney(Math.round(futureValue), currency)}</div>
           </div>
           <div>
             <div className="text-xs text-slate-500">{t('difference')}</div>
-            <div className="mt-1 text-2xl font-black text-slate-900">{formatMoney(Math.round(difference))} UZS</div>
+            <div className="mt-1 text-2xl font-black text-slate-900">{libFormatMoney(Math.round(difference), currency)}</div>
           </div>
         </div>
 
@@ -118,7 +116,7 @@ export default function WhatIfPanel() {
             <LineChart data={chartData}>
               <XAxis dataKey="year" />
               <YAxis />
-              <Tooltip formatter={(value: number) => `${formatMoney(Number(value))} UZS`} />
+              <Tooltip formatter={(value: number) => `${libFormatMoney(Number(value), currency)}`} />
               <Legend />
               <Line type="monotone" dataKey="spent" stroke="#8884d8" name={t('money_spent')} />
               <Line type="monotone" dataKey="invested" stroke="#D4AF37" name={t('potential_investment')} />

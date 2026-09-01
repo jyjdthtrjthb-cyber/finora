@@ -130,7 +130,12 @@
   "extra_monthly_contribution": "Доп. ежемесячный взнос",
   "standard_payoff": "Обычный срок",
   "fast_track": "Быстрый срок",
-  "interest_saved_summary": "Экономия {{amount}} UZS в процентах при доплате к минимальному платежу.",
+  "interest_saved_summary": "Экономия {{amount}} в процентах при доплате к минимальному платежу.",
+  "choose_currency": "Выберите валюту аккаунта",
+  "change_currency_confirm_title": "Изменить валюту аккаунта",
+  "change_currency_confirm_body": "Изменение валюты аккаунта не будет конвертировать уже сохранённые числовые значения. Продолжить?",
+  "currency_saved": "Предпочтение валюты сохранено.",
+  "currency_save_error": "Не удалось сохранить предпочтение валюты."
   "bank_yield_rate": "Ставка доходности банка",
   "currency_preference": "Предпочтительная валюта",
   "language_switcher": "Язык",

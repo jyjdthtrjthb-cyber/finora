@@ -122,6 +122,9 @@ ALTER TABLE IF EXISTS public.child_funds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.scenarios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.subscriptions ENABLE ROW LEVEL SECURITY;
 
+-- Add currency preference to profiles
+ALTER TABLE IF EXISTS public.profiles ADD COLUMN IF NOT EXISTS currency_preference text DEFAULT 'UZS';
+
 -- Policies: allow authenticated users to manage their own rows
 -- Profiles: user owns their profile (id == auth.uid())
 DO $$

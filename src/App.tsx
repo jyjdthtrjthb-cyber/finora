@@ -1,6 +1,7 @@
 import React from 'react'
 import { Routes, Route, Link, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { CurrencyProvider } from './context/CurrencyContext'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -134,9 +135,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <UpgradeModalProvider>
-        <AppRoutes />
-      </UpgradeModalProvider>
+      <CurrencyProvider>
+        <UpgradeModalProvider>
+          <AppRoutes />
+        </UpgradeModalProvider>
+      </CurrencyProvider>
     </AuthProvider>
   )
 }

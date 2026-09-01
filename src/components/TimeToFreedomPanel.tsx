@@ -1,13 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { calculateTimeToFreedom } from '../lib/timeToFreedom'
-
-function formatMoney(value: number) {
-  return Number(value || 0).toLocaleString('ru-RU')
-}
+import { useCurrency } from '../context/CurrencyContext'
+import { formatMoney as libFormatMoney } from '../lib/currency'
 
 export default function TimeToFreedomPanel() {
   const { t } = useTranslation()
+  const { currency } = useCurrency()
   const storedProfileRaw = typeof window !== 'undefined' ? window.localStorage.getItem('finora_user_profile') : null
   const storedProfile = storedProfileRaw ? JSON.parse(storedProfileRaw) : null
 
@@ -90,11 +89,11 @@ export default function TimeToFreedomPanel() {
 
           <div className="rounded-2xl border border-[#F8D66D]/20 bg-gradient-to-br from-[#111827] via-[#0F172A] to-[#1E293B] p-6 text-white">
             <div className="text-sm uppercase tracking-[0.18em] text-[#FDE68A]">{t('time_cost')}</div>
-            <div className="mt-4 text-4xl font-black text-[#FFD700]">{formatMoney(Math.round(result.hoursRequired || 0))} {t('hours')}</div>
+            <div className="mt-4 text-4xl font-black text-[#FFD700]">{Math.round(result.hoursRequired || 0).toLocaleString('ru-RU')} {t('hours')}</div>
             <div className="mt-2 text-lg font-semibold">{Math.round(result.daysRequired || 0)} {t('working_days')}</div>
-            <div className="mt-3 text-sm text-slate-200">{t('instead_of_price')} {formatMoney(purchasePrice)} UZS</div>
+            <div className="mt-3 text-sm text-slate-200">{t('instead_of_price')} {libFormatMoney(purchasePrice, currency)}</div>
             {result.hourlyIncome > 0 && (
-              <div className="mt-4 text-sm text-slate-200">{t('hourly_income_label')}: {formatMoney(Math.round(result.hourlyIncome))} UZS/{t('hour')}</div>
+              <div className="mt-4 text-sm text-slate-200">{t('hourly_income_label')}: {libFormatMoney(Math.round(result.hourlyIncome), currency)}/{t('hour')}</div>
             )}
             {typeof result.percentOfMonthly === 'number' && (
               <div className="mt-2 text-sm text-slate-200">{t('percent_of_month')}: {Math.round(result.percentOfMonthly)}%</div>
@@ -107,8 +106,8 @@ export default function TimeToFreedomPanel() {
       <div className="rounded-2xl border border-slate-200 bg-white p-4">
         <div className="text-sm font-semibold text-slate-700">{t('comparison')}</div>
         <div className="mt-3">
-          <div className="text-sm text-slate-500">{t('purchase_price')}: {formatMoney(purchasePrice)} UZS</div>
-          <div className="text-sm text-slate-500">{t('monthly_income')}: {formatMoney(monthlyIncome)} UZS</div>
+          <div className="text-sm text-slate-500">{t('purchase_price')}: {libFormatMoney(purchasePrice, currency)}</div>
+          <div className="text-sm text-slate-500">{t('monthly_income')}: {libFormatMoney(monthlyIncome, currency)}</div>
           {monthlyIncome > 0 && (
             <div className="mt-2 text-lg font-black text-slate-900">{Math.round((purchasePrice / monthlyIncome) * 100)}% {t('of_monthly_income')}</div>
           )}

@@ -130,7 +130,12 @@
   "extra_monthly_contribution": "Qo'shimcha oylik badal",
   "standard_payoff": "Standart muddat",
   "fast_track": "Tezkor muddat",
-  "interest_saved_summary": "Minimal to'lovga qo'shimcha to'lov orqali {{amount}} UZS miqdorida foiz tejash.",
+  "interest_saved_summary": "Minimal to'lovga qo'shimcha to'lov orqali {{amount}} miqdorida foiz tejash.",
+  "choose_currency": "Hisob valyutasini tanlang",
+  "change_currency_confirm_title": "Hisob valyutasini o'zgartirish",
+  "change_currency_confirm_body": "Hisob valyutasini o'zgartirish saqlangan sonli qiymatlarni avtomatik ravishda konvertatsiya qilmaydi. Davom etasizmi?",
+  "currency_saved": "Valyuta afzalligi saqlandi.",
+  "currency_save_error": "Valyuta afzalligini saqlash muvaffaqiyatsiz tugadi."
   "bank_yield_rate": "Bank daromad stavkasi",
   "currency_preference": "Afzal ko'rilgan valyuta",
   "language_switcher": "Til",

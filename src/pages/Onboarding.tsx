@@ -8,11 +8,21 @@ const categories = ['Food','Transport','Housing','Education','Entertainment','Sh
 const STORAGE_KEY = 'finora_onboarding_state'
 const COMPLETED_KEY = 'finora_hasCompletedOnboarding'
 
+const CURRENCY_OPTIONS = ['UZS','USD','EUR','RUB'] as const
+type CurrencyOpt = typeof CURRENCY_OPTIONS[number]
+
 export default function Onboarding() {
   const { t } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
+  const [currency, setCurrency] = useState<CurrencyOpt>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = window.localStorage.getItem('finora_currency')
+      if (stored && (stored === 'UZS' || stored === 'USD' || stored === 'EUR' || stored === 'RUB')) return stored as CurrencyOpt
+    }
+    return 'UZS'
+  })
   const [income, setIncome] = useState<number | ''>('')
   const [spending, setSpending] = useState<Record<string, number>>(() => categories.reduce((acc, c) => ({ ...acc, [c]: 0 }), {} as Record<string, number>))
   const [savings, setSavings] = useState<number | ''>('')
@@ -21,14 +31,15 @@ export default function Onboarding() {
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  const next = () => setStep((s) => Math.min(4, s + 1))
+  const next = () => setStep((s) => Math.min(5, s + 1))
   const prev = () => setStep((s) => Math.max(1, s - 1))
 
   const persistOnboarding = () => {
-    const onboardingState = { income, spending, savings, goal, hasCompletedOnboarding: true }
+    const onboardingState = { currency, income, spending, savings, goal, hasCompletedOnboarding: true }
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(onboardingState))
       window.localStorage.setItem(COMPLETED_KEY, 'true')
+      window.localStorage.setItem('finora_currency', currency)
     }
   }
 
@@ -66,6 +77,7 @@ export default function Onboarding() {
     try {
       await supabase.from('profiles').upsert({
         id: user.id,
+        currency_preference: currency,
         monthly_income: income || 0,
         monthly_savings: savings || 0,
         preferred_locale: preferredLocale,
@@ -103,15 +115,27 @@ export default function Onboarding() {
     <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
       <h2 className="text-2xl font-bold mb-4">{t('onboarding_title')}</h2>
       <form onSubmit={submit} className="space-y-4">
-        <div className="mb-4">{t('onboarding_step', { step, total: 4 })}</div>
+        <div className="mb-4">{t('onboarding_step', { step, total: 5 })}</div>
         {step === 1 && (
+          <div>
+            <div className="mb-2 text-sm font-medium">{t('choose_currency')}</div>
+            <div className="grid grid-cols-2 gap-2">
+              {CURRENCY_OPTIONS.map((c) => (
+                <button key={c} type="button" onClick={() => setCurrency(c)} className={`p-3 rounded border ${currency === c ? 'border-slate-900 bg-slate-100' : 'border-slate-200 bg-white'}`}>
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {step === 2 && (
           <div>
             <label className="block text-sm">{t('income_label')}</label>
             <input type="number" className="w-full p-2 border rounded mt-1" value={income} onChange={e => setIncome(e.target.value === '' ? '' : Number(e.target.value))} />
             {fieldErrors.income && <div className="text-red-600 text-sm">{fieldErrors.income}</div>}
           </div>
         )}
-        {step === 2 && (
+        {step === 3 && (
           <div>
             <div className="text-sm mb-2">{t('spend_label')}</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -125,14 +149,14 @@ export default function Onboarding() {
             </div>
           </div>
         )}
-        {step === 3 && (
+        {step === 4 && (
           <div>
             <label className="block text-sm">{t('savings_label')}</label>
             <input type="number" className="w-full p-2 border rounded mt-1" value={savings} onChange={e => setSavings(e.target.value === '' ? '' : Number(e.target.value))} />
             {fieldErrors.savings && <div className="text-red-600 text-sm">{fieldErrors.savings}</div>}
           </div>
         )}
-        {step === 4 && (
+        {step === 5 && (
           <div>
             <label className="block text-sm">{t('goal_label')}</label>
             <select className="w-full p-2 border rounded mt-1" value={goal} onChange={e => setGoal(e.target.value)}>
