@@ -4,6 +4,8 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend, Ar
 import { useUpgradeModal } from './UpgradeModalProvider'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useCurrency } from '../context/CurrencyContext'
+import { formatMoney as libFormatMoney } from '../lib/currency'
 import { calculateDailyWeeklyMonthlyYearly, longTermSavings, futureValueSeries, ReductionScheduleRow } from '../lib/badHabitCalculations'
 
 type Category = {
@@ -116,6 +118,8 @@ export default function BadHabitPanel() {
     )
   }
 
+  const { currency } = useCurrency()
+
   return (
     <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_35px_rgba(15,23,42,0.07)]">
       <div className="mb-4 flex items-center justify-between">
@@ -176,12 +180,12 @@ export default function BadHabitPanel() {
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('your_habit_costs')}</div>
-          <div className="mt-2 text-3xl font-black text-slate-900">{Number(monthly).toLocaleString()} UZS / {t('per_month')}</div>
-          <div className="mt-1 text-sm text-slate-600">{Number(yearly).toLocaleString()} UZS {t('per_year')}</div>
+          <div className="mt-2 text-3xl font-black text-slate-900">{libFormatMoney(Number(monthly), currency)} / {t('per_month')}</div>
+          <div className="mt-1 text-sm text-slate-600">{libFormatMoney(Number(yearly), currency)} {t('per_year')}</div>
 
           <div className="mt-4">
             <h3 className="text-sm font-semibold text-slate-700">{t('if_you_stop')}</h3>
-            <div className="mt-2 text-2xl font-black text-[#D4AF37]">{Number(longTerm['20']).toLocaleString()} UZS</div>
+            <div className="mt-2 text-2xl font-black text-[#D4AF37]">{libFormatMoney(Number(longTerm['20']), currency)}</div>
             <div className="mt-1 text-sm text-slate-500">{t('over_20_years')}</div>
           </div>
 
@@ -202,7 +206,7 @@ export default function BadHabitPanel() {
               <AreaChart data={chartData}>
                 <XAxis dataKey="year" />
                 <YAxis />
-                <Tooltip formatter={(value: number) => `${Number(value).toLocaleString()} UZS`} />
+                <Tooltip formatter={(value: number) => `${libFormatMoney(Number(value), currency)}`} />
                 <Area type="monotone" dataKey="saved" stroke="#D4AF37" fill="#FFF1C9" />
                 {investmentSeries && <Area type="monotone" dataKey="invest" stroke="#94a3b8" fill="#E6EEF8" />}
               </AreaChart>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useTranslation } from 'react-i18next'
+import { useCurrency } from '../context/CurrencyContext'
 
 const categories = ['Food','Transport','Housing','Education','Entertainment','Shopping','Health','Family','Other']
 const STORAGE_KEY = 'finora_onboarding_state'
@@ -15,7 +16,10 @@ export default function Onboarding() {
   const { t } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const TOTAL_STEPS = 5
   const [step, setStep] = useState(1)
+  const { setCurrency: setGlobalCurrency } = useCurrency()
+
   const [currency, setCurrency] = useState<CurrencyOpt>(() => {
     if (typeof window !== 'undefined') {
       const stored = window.localStorage.getItem('finora_currency')
@@ -31,7 +35,7 @@ export default function Onboarding() {
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  const next = () => setStep((s) => Math.min(5, s + 1))
+  const next = () => setStep((s) => Math.min(TOTAL_STEPS, s + 1))
   const prev = () => setStep((s) => Math.max(1, s - 1))
 
   const persistOnboarding = () => {
@@ -46,8 +50,8 @@ export default function Onboarding() {
   const validateStep = (s: number) => {
     const errs: Record<string, string> = {}
     if (s === 1) {
-      if (income === '' || income === null) errs.income = t('required_field')
-      else if (Number(income) < 0) errs.income = t('invalid_number')
+      if (!currency) errs.currency = t('required_field')
+      else if (!(currency === 'UZS' || currency === 'USD' || currency === 'EUR' || currency === 'RUB')) errs.currency = t('invalid_number')
     }
     if (s === 2) {
       Object.entries(spending).forEach(([k, v]) => {
@@ -59,6 +63,10 @@ export default function Onboarding() {
       else if (Number(savings) < 0) errs.savings = t('invalid_number')
       else if (income !== '' && Number(savings) > Number(income)) errs.savings = t('invalid_number')
     }
+    if (s === 4) {
+      if (income === '' || income === null) errs.income = t('required_field')
+      else if (Number(income) < 0) errs.income = t('invalid_number')
+    }
     setFieldErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -68,7 +76,7 @@ export default function Onboarding() {
     setError(null)
     if (!user) return setError(t('required_field'))
 
-    const isValid = validateStep(1) && validateStep(2) && validateStep(3)
+    const isValid = validateStep(1) && validateStep(2) && validateStep(3) && validateStep(4)
     if (!isValid) return
 
     const preferredLocale = typeof window !== 'undefined' ? (window.localStorage.getItem('finora_lang') || 'ru') : 'ru'
@@ -115,7 +123,7 @@ export default function Onboarding() {
     <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
       <h2 className="text-2xl font-bold mb-4">{t('onboarding_title')}</h2>
       <form onSubmit={submit} className="space-y-4">
-        <div className="mb-4">{t('onboarding_step', { step, total: 5 })}</div>
+        <div className="mb-4">{t('onboarding_step', { step, total: TOTAL_STEPS })}</div>
         {step === 1 && (
           <div>
             <div className="mb-2 text-sm font-medium">{t('choose_currency')}</div>
@@ -177,10 +185,37 @@ export default function Onboarding() {
           {step > 1 && (
             <button type="button" onClick={prev} className="px-4 py-2 border rounded">{t('back')}</button>
           )}
-          {step < 4 && (
-            <button type="button" onClick={() => { if (validateStep(step)) next() }} className="px-4 py-2 bg-finora text-white rounded">{t('next')}</button>
+          {step < TOTAL_STEPS && (
+            <button
+              type="button"
+              onClick={async () => {
+                if (!validateStep(step)) return
+                // If on currency step, persist immediately
+                if (step === 1) {
+                  try {
+                    if (user?.id) {
+                      const { error } = await supabase.from('profiles').upsert({ id: user.id, currency_preference: currency }, { onConflict: 'id' })
+                      if (error) {
+                        setError(error.message)
+                        return
+                      }
+                    }
+                    // update global currency immediately
+                    try { await setGlobalCurrency(currency) } catch { /* ignore */ }
+                    if (typeof window !== 'undefined') window.localStorage.setItem('finora_currency', currency)
+                  } catch (e: any) {
+                    setError(e?.message || 'Failed')
+                    return
+                  }
+                }
+                next()
+              }}
+              className="px-4 py-2 bg-finora text-white rounded"
+            >
+              {t('next')}
+            </button>
           )}
-          {step === 4 && (
+          {step === TOTAL_STEPS && (
             <button type="submit" className="px-4 py-2 bg-finora text-white rounded" disabled={loading}>
               {loading ? 'Saving...' : t('finish')}
             </button>

@@ -74,7 +74,7 @@ export default function Dashboard() {
   const { t, i18n } = useTranslation()
   const [activeTab, setActiveTab] = useState<TabKey>('home')
   const [profile, setProfile] = useState<any>(null)
-  const { currency } = useCurrency()
+  const { currency, setCurrency: setGlobalCurrency } = useCurrency()
   // upgrade modal is provided by UpgradeModalProvider
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false)
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
@@ -549,8 +549,19 @@ export default function Dashboard() {
         if (typeof window !== 'undefined') {
           window.localStorage.setItem('finora_user_profile', JSON.stringify(localProfile))
         }
+        // if saved successfully, update global currency immediately
+        try {
+          await setGlobalCurrency(payload.currency_preference as any)
+        } catch {
+          // ignore
+        }
         setToast(t('profile_updated_success'))
       } else {
+        try {
+          await setGlobalCurrency(payload.currency_preference as any)
+        } catch {
+          // ignore
+        }
         setToast(t('profile_updated_success'))
       }
     } catch (error) {

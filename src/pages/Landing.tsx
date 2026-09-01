@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useTranslation } from 'react-i18next'
+import { useCurrency } from '../context/CurrencyContext'
+import { formatMoney as libFormatMoney } from '../lib/currency'
 import { proFeatures } from '../data/proFeatures'
 
 function calcProjection(monthly: number, rate: number, years: number) {
@@ -31,6 +33,7 @@ const featureList = [
 
 export default function Landing() {
   const { t } = useTranslation()
+  const { currency } = useCurrency()
   const [monthly, setMonthly] = useState(5000000)
   const [rate, setRate] = useState(10)
   const [years, setYears] = useState(10)
@@ -75,7 +78,7 @@ export default function Landing() {
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
                 <div className="text-xs uppercase tracking-[0.18em] text-slate-400">{t('monthly_label')}</div>
-                <div className="mt-2 text-xl font-bold text-white">{Number(monthly).toLocaleString('ru-RU')} UZS</div>
+                <div className="mt-2 text-xl font-bold text-white">{libFormatMoney(monthly, currency)}</div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
                 <div className="text-xs uppercase tracking-[0.18em] text-slate-400">{t('growth_label')}</div>
@@ -107,7 +110,7 @@ export default function Landing() {
                     <YAxis tick={{ fill: '#cbd5e1', fontSize: 10 }} axisLine={false} tickLine={false} />
                     <Tooltip
                       contentStyle={{ background: '#111827', border: '1px solid rgba(255,215,0,0.25)', borderRadius: 12, color: '#fff' }}
-                      formatter={(value: number) => `${Number(value).toLocaleString('ru-RU')} UZS`}
+                      formatter={(value: number) => `${libFormatMoney(Number(value), currency)}`}
                     />
                     <Line type="monotone" dataKey="value" stroke="#FFD700" strokeWidth={3} dot={false} activeDot={{ r: 5, fill: '#FDE68A' }} />
                   </LineChart>
@@ -134,8 +137,8 @@ export default function Landing() {
                               <span className="font-medium text-white">{t(item.nameKey)}</span>
                             </div>
                           </td>
-                          <td className="px-3 py-2 text-slate-300">{item.monthly.toLocaleString('ru-RU')} UZS</td>
-                          <td className="px-3 py-2 font-semibold text-[#FDE68A]">{result.final.toLocaleString('ru-RU')} UZS</td>
+                          <td className="px-3 py-2 text-slate-300">{libFormatMoney(item.monthly, currency)}</td>
+                          <td className="px-3 py-2 font-semibold text-[#FDE68A]">{libFormatMoney(result.final, currency)}</td>
                         </tr>
                       )
                     })}

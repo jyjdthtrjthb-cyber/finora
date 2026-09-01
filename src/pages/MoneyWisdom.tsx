@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
+import { useCurrency } from '../context/CurrencyContext'
+import { formatMoney as libFormatMoney } from '../lib/currency'
 import { useUpgradeModal } from '../components/UpgradeModalProvider'
 import { financialRules, type FinancialRule } from '../data/financialRules'
 import {
@@ -146,6 +148,8 @@ function RuleCalculator({ rule, lang }: { rule: FinancialRule; lang: 'en' | 'ru'
     'compare-debts': { title: 'Highest rate', value: `${(result as any)?.debtName || 'Debt A'} • ${(result as any)?.rate || 0}%` },
     'automate-savings': { title: 'Auto transfer', value: `${formatNumber(calculateTenPercent(Number(income || 0)))} UZS` }
   }
+
+  const { currency } = useCurrency()
 
   return (
     <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">

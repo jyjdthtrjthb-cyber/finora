@@ -36,7 +36,21 @@ export const CurrencyProvider = ({ children }: { children: React.ReactNode }) =>
         // ignore, keep default
       }
     })()
-    return () => { mounted = false }
+    // subscribe to profile changes so currency updates propagate in real-time
+    const channel = supabase.channel('currency-sync')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, (payload) => {
+        const pref = payload.new?.currency_preference
+        if (pref && (pref === 'UZS' || pref === 'USD' || pref === 'EUR' || pref === 'RUB')) {
+          setCurrencyState(pref)
+          if (typeof window !== 'undefined') window.localStorage.setItem('finora_currency', pref)
+        }
+      })
+      .subscribe()
+
+    return () => {
+      mounted = false
+      void channel.unsubscribe()
+    }
   }, [user?.id])
 
   const setCurrency = async (next: CurrencyCode) => {
