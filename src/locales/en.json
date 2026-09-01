@@ -137,7 +137,7 @@
   "change_currency_confirm_body": "Changing your account currency will not convert stored numeric values. Are you sure you want to proceed?",
   "currency_saved": "Currency preference saved.",
   "currency_save_error": "Failed to save currency preference."
-  "bank_yield_rate": "Bank yield rate",
+  ,"bank_yield_rate": "Bank yield rate",
   "currency_preference": "Preferred currency",
   "language_switcher": "Language",
   "home_tab": "Home",
