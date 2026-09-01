@@ -11,6 +11,7 @@ export default function WhatIfPanel() {
   const [frequency, setFrequency] = useState<'daily' | 'weekly' | 'monthly'>('daily')
   const [annualReturn, setAnnualReturn] = useState<number>(7)
   const [years, setYears] = useState<number>(20)
+  const { currency } = useCurrency()
 
   const monthlyEquivalent = useMemo(() => {
     const a = Number(amount) || 0
@@ -52,7 +53,7 @@ export default function WhatIfPanel() {
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <div>
             <label className="block text-sm text-slate-700">{t('expense_amount')}</label>
-            <input value={amount} onChange={(e) => setAmount(Number(e.target.value || 0))} className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900" />
+            <input type="number" min="0" value={amount} onChange={(e) => setAmount(Number(e.target.value || 0))} className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900" />
           </div>
 
           <div>
@@ -66,7 +67,7 @@ export default function WhatIfPanel() {
 
           <div>
             <label className="block text-sm text-slate-700">{t('annual_return')}</label>
-            <input value={annualReturn} onChange={(e) => setAnnualReturn(Number(e.target.value || 0))} className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900" />
+            <input type="number" min="0" max="100" value={annualReturn} onChange={(e) => setAnnualReturn(Number(e.target.value || 0))} className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900" />
           </div>
         </div>
 
