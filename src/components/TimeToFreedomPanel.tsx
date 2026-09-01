@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { calculateTimeToFreedom } from '../lib/timeToFreedom'
 
@@ -34,6 +34,16 @@ export default function TimeToFreedomPanel() {
     purchasePrice: Number(input.purchasePrice),
     hoursPerDay: Number(input.hoursPerDay)
   }), [input, mode])
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const p = params.get('purchasePrice')
+      if (p) setPurchasePrice(Number(p))
+    } catch (e) {
+      // ignore
+    }
+  }, [])
 
   return (
     <div className="space-y-4">

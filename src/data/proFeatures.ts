@@ -11,7 +11,7 @@ export const proFeatures = {
   headline: 'Finora Pro',
   telegramUrl: 'https://t.me/Bilol_44',
   freePlan: ['5 goals', '10 Money Wisdom rules', 'basic functionality'],
-  proPlan: ['15 goals', '20 Money Wisdom rules', 'advanced features'],
+  proPlan: ['Multiple goals', '20 Pro Money Wisdom rules (30 total)', 'advanced features', 'Bad Habit Quitter'],
   features: [
     { key: 'pro_feature_goals', icon: '🎯' },
     { key: 'pro_feature_debt_management', icon: '💳' },
@@ -22,7 +22,8 @@ export const proFeatures = {
     { key: 'pro_feature_advanced_analytics', icon: '📊' },
     { key: 'pro_feature_what_if', icon: '🔮' },
     { key: 'pro_feature_long_term', icon: '📅' },
-    { key: 'pro_feature_money_wisdom', icon: '💡' }
+    { key: 'pro_feature_money_wisdom', icon: '💡' },
+    { key: 'pro_feature_bad_habit_quitter', icon: '🚭' }
   ] as ProFeatureItem[]
 }
 

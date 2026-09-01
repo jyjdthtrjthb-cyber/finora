@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { seriesFutureValues, futureValueMonthly } from '../lib/opportunityCost'
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from 'recharts'
@@ -20,6 +20,18 @@ export default function WhatIfPanel() {
     if (frequency === 'weekly') return a * (52 / 12)
     return a
   }, [amount, frequency])
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const a = params.get('amount')
+      const f = params.get('frequency')
+      if (a) setAmount(Number(a))
+      if (f && (f === 'daily' || f === 'weekly' || f === 'monthly')) setFrequency(f as any)
+    } catch (e) {
+      // ignore
+    }
+  }, [])
 
   const months = years * 12
   const totalSpent = useMemo(() => monthlyEquivalent * months, [monthlyEquivalent, months])

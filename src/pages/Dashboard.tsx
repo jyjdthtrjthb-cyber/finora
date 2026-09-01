@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAuth } from '../hooks/useAuth'
 import MoneyWisdom from './MoneyWisdom'
+import BadHabitPanel from '../components/BadHabitPanel'
 import TimeToFreedomPanel from '../components/TimeToFreedomPanel'
 import WhatIfPanel from '../components/WhatIfPanel'
 import { useUpgradeModal } from '../components/UpgradeModalProvider'
@@ -18,7 +19,7 @@ type Goal = {
   monthly: number
 }
 
-type TabKey = 'home' | 'account' | 'goals' | 'calculators' | 'money_wisdom' | 'time_to_freedom' | 'what_if'
+type TabKey = 'home' | 'account' | 'goals' | 'calculators' | 'money_wisdom' | 'time_to_freedom' | 'what_if' | 'bad_habit'
 
 type Debt = {
   id: string
@@ -344,7 +345,8 @@ export default function Dashboard() {
     { key: 'goals', label: t('goals_tab'), icon: '🎯' },
     { key: 'money_wisdom', label: t('money_wisdom'), icon: '💡' },
     { key: 'time_to_freedom', label: t('time_to_freedom'), icon: '⏳' },
-    { key: 'what_if', label: t('what_if'), icon: '🔮' }
+    { key: 'what_if', label: t('what_if'), icon: '🔮' },
+    { key: 'bad_habit', label: t('bad_habit_title'), icon: '🚭' }
   ]
 
   const persistGoals = (nextGoals: Goal[]) => {
@@ -772,6 +774,12 @@ export default function Dashboard() {
       {activeTab === 'what_if' && (
         <div>
           <WhatIfPanel />
+        </div>
+      )}
+
+      {activeTab === 'bad_habit' && (
+        <div>
+          <BadHabitPanel />
         </div>
       )}
 
