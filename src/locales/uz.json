@@ -135,7 +135,7 @@
   "change_currency_confirm_title": "Hisob valyutasini o'zgartirish",
   "change_currency_confirm_body": "Hisob valyutasini o'zgartirish saqlangan sonli qiymatlarni avtomatik ravishda konvertatsiya qilmaydi. Davom etasizmi?",
   "currency_saved": "Valyuta afzalligi saqlandi.",
-  "currency_save_error": "Valyuta afzalligini saqlash muvaffaqiyatsiz tugadi."
+  "currency_save_error": "Valyuta afzalligini saqlash muvaffaqiyatsiz tugadi.",
   "bank_yield_rate": "Bank daromad stavkasi",
   "currency_preference": "Afzal ko'rilgan valyuta",
   "language_switcher": "Til",
