@@ -53,19 +53,22 @@ export default function Onboarding() {
       if (!currency) errs.currency = t('required_field')
       else if (!(currency === 'UZS' || currency === 'USD' || currency === 'EUR' || currency === 'RUB')) errs.currency = t('invalid_number')
     }
+    // Step 2: income
     if (s === 2) {
+      if (income === '' || income === null) errs.income = t('required_field')
+      else if (Number(income) < 0) errs.income = t('invalid_number')
+    }
+    // Step 3: spending (categories)
+    if (s === 3) {
       Object.entries(spending).forEach(([k, v]) => {
         if (v == null || Number.isNaN(Number(v)) || Number(v) < 0) errs[k] = t('invalid_number')
       })
     }
-    if (s === 3) {
+    // Step 4: savings
+    if (s === 4) {
       if (savings === '' || savings == null) errs.savings = t('required_field')
       else if (Number(savings) < 0) errs.savings = t('invalid_number')
       else if (income !== '' && Number(savings) > Number(income)) errs.savings = t('invalid_number')
-    }
-    if (s === 4) {
-      if (income === '' || income === null) errs.income = t('required_field')
-      else if (Number(income) < 0) errs.income = t('invalid_number')
     }
     setFieldErrors(errs)
     return Object.keys(errs).length === 0
