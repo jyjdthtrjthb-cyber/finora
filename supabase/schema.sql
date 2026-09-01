@@ -111,7 +111,6 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   created_at timestamptz DEFAULT now()
 );
 
--- Enable Row Level Security on all user data tables
 ALTER TABLE IF EXISTS public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.budgets ENABLE ROW LEVEL SECURITY;
@@ -122,11 +121,9 @@ ALTER TABLE IF EXISTS public.child_funds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.scenarios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.subscriptions ENABLE ROW LEVEL SECURITY;
 
--- Add currency preference to profiles
-ALTER TABLE IF EXISTS public.profiles ADD COLUMN IF NOT EXISTS currency_preference text DEFAULT 'UZS';
+-- Add currency column to profiles (single canonical field)
+ALTER TABLE IF EXISTS public.profiles ADD COLUMN IF NOT EXISTS currency text DEFAULT 'UZS';
 
--- Policies: allow authenticated users to manage their own rows
--- Profiles: user owns their profile (id == auth.uid())
 DO $$
 BEGIN
   IF NOT EXISTS (

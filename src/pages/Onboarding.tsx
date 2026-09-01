@@ -85,7 +85,7 @@ export default function Onboarding() {
     try {
       await supabase.from('profiles').upsert({
         id: user.id,
-        currency_preference: currency,
+        currency: currency,
         monthly_income: income || 0,
         monthly_savings: savings || 0,
         preferred_locale: preferredLocale,
@@ -194,7 +194,7 @@ export default function Onboarding() {
                 if (step === 1) {
                   try {
                     if (user?.id) {
-                      const { error } = await supabase.from('profiles').upsert({ id: user.id, currency_preference: currency }, { onConflict: 'id' })
+                      const { error } = await supabase.from('profiles').upsert({ id: user.id, currency: currency }, { onConflict: 'id' })
                       if (error) {
                         setError(error.message)
                         return

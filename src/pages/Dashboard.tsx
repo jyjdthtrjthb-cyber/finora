@@ -91,7 +91,7 @@ export default function Dashboard() {
     monthly_expenses: '',
     savings_target: '',
     bank_yield_rate: '19',
-    currency_preference: 'UZS'
+    currency: 'UZS'
   })
   const [initialDeposit, setInitialDeposit] = useState(1000000)
   const [monthlyInvestment, setMonthlyInvestment] = useState(200000)
@@ -183,14 +183,14 @@ export default function Dashboard() {
     })()
 
     if (!user) {
-      if (storedProfile) {
+        if (storedProfile) {
         setProfile(storedProfile)
         setAccountDraft({
           monthly_income: String(storedProfile.monthly_income ?? 0),
           monthly_expenses: String(storedProfile.monthly_expenses ?? 0),
           savings_target: String(storedProfile.savings_target ?? storedProfile.monthly_savings ?? 0),
           bank_yield_rate: String(storedProfile.bank_yield_rate ?? storedProfile.bank_annual_yield ?? 19),
-          currency_preference: storedProfile.currency_preference ?? 'UZS'
+          currency: storedProfile.currency ?? storedProfile.currency_preference ?? 'UZS'
         })
       }
       return
@@ -198,14 +198,14 @@ export default function Dashboard() {
 
     supabase.from('profiles').select('*').eq('id', user.id).maybeSingle().then((res) => {
       if (!res.error && res.data) {
-        const mergedProfile = {
+          const mergedProfile = {
           ...storedProfile,
           ...res.data,
           monthly_income: res.data.monthly_income ?? storedProfile?.monthly_income ?? 0,
           monthly_expenses: res.data.monthly_expenses ?? storedProfile?.monthly_expenses ?? 0,
           savings_target: res.data.savings_target ?? res.data.monthly_savings ?? storedProfile?.savings_target ?? storedProfile?.monthly_savings ?? 0,
           bank_yield_rate: res.data.bank_yield_rate ?? res.data.bank_annual_yield ?? storedProfile?.bank_yield_rate ?? 19,
-          currency_preference: res.data.currency_preference ?? storedProfile?.currency_preference ?? 'UZS'
+          currency: res.data.currency ?? res.data.currency_preference ?? storedProfile?.currency ?? storedProfile?.currency_preference ?? 'UZS'
         }
         setProfile(mergedProfile)
         setAccountDraft({
@@ -213,7 +213,7 @@ export default function Dashboard() {
           monthly_expenses: String(mergedProfile.monthly_expenses ?? 0),
           savings_target: String(mergedProfile.savings_target ?? mergedProfile.monthly_savings ?? 0),
           bank_yield_rate: String(mergedProfile.bank_yield_rate ?? mergedProfile.bank_annual_yield ?? 19),
-          currency_preference: mergedProfile.currency_preference ?? 'UZS'
+          currency: mergedProfile.currency ?? mergedProfile.currency_preference ?? 'UZS'
         })
         if (typeof window !== 'undefined') {
           window.localStorage.setItem('finora_user_profile', JSON.stringify(mergedProfile))
@@ -225,7 +225,7 @@ export default function Dashboard() {
           monthly_expenses: String(storedProfile.monthly_expenses ?? 0),
           savings_target: String(storedProfile.savings_target ?? storedProfile.monthly_savings ?? 0),
           bank_yield_rate: String(storedProfile.bank_yield_rate ?? storedProfile.bank_annual_yield ?? 19),
-          currency_preference: storedProfile.currency_preference ?? 'UZS'
+          currency: storedProfile.currency ?? storedProfile.currency_preference ?? 'UZS'
         })
       }
     })
@@ -502,7 +502,7 @@ export default function Dashboard() {
       monthly_expenses: Number(accountDraft.monthly_expenses || 0),
       savings_target: Number(accountDraft.savings_target || 0),
       bank_yield_rate: Number(accountDraft.bank_yield_rate || 0),
-      currency_preference: accountDraft.currency_preference || 'UZS'
+      currency: accountDraft.currency || 'UZS'
     }
 
     const localProfile = {
@@ -525,7 +525,7 @@ export default function Dashboard() {
     }
 
     // If currency changed, confirm with the user (no automatic conversion)
-    if (profile?.currency_preference && profile.currency_preference !== payload.currency_preference) {
+    if ((profile?.currency || profile?.currency_preference) && (profile.currency ?? profile.currency_preference) !== payload.currency) {
       const ok = typeof window !== 'undefined' ? window.confirm(t('change_currency_confirm_body')) : true
       if (!ok) {
         setIsAccountModalOpen(false)
@@ -540,7 +540,7 @@ export default function Dashboard() {
         id: user.id,
         monthly_income: payload.monthly_income,
         monthly_expenses: payload.monthly_expenses,
-        currency_preference: payload.currency_preference,
+        currency: payload.currency,
         monthly_savings: payload.savings_target,
         bank_annual_yield: payload.bank_yield_rate
       }, { onConflict: 'id' })
@@ -551,14 +551,14 @@ export default function Dashboard() {
         }
         // if saved successfully, update global currency immediately
         try {
-          await setGlobalCurrency(payload.currency_preference as any)
+          await setGlobalCurrency(payload.currency as any)
         } catch {
           // ignore
         }
         setToast(t('profile_updated_success'))
       } else {
         try {
-          await setGlobalCurrency(payload.currency_preference as any)
+          await setGlobalCurrency(payload.currency as any)
         } catch {
           // ignore
         }
@@ -1276,7 +1276,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">{t('currency_preference')}</label>
-                <select value={accountDraft.currency_preference} onChange={(e) => setAccountDraft((prev) => ({ ...prev, currency_preference: e.target.value }))} className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 outline-none focus:border-[#D4AF37]">
+                <select value={accountDraft.currency} onChange={(e) => setAccountDraft((prev) => ({ ...prev, currency: e.target.value }))} className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 outline-none focus:border-[#D4AF37]">
                   <option value="UZS">UZS</option>
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>

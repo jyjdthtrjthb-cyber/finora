@@ -25,9 +25,9 @@ export const CurrencyProvider = ({ children }: { children: React.ReactNode }) =>
     if (!user?.id) return
     ;(async () => {
       try {
-        const { data } = await supabase.from('profiles').select('currency_preference').eq('id', user.id).maybeSingle()
+        const { data } = await supabase.from('profiles').select('currency').eq('id', user.id).maybeSingle()
         if (!mounted) return
-        const pref = data?.currency_preference
+        const pref = data?.currency
         if (pref && (pref === 'UZS' || pref === 'USD' || pref === 'EUR' || pref === 'RUB')) {
           setCurrencyState(pref)
           if (typeof window !== 'undefined') window.localStorage.setItem('finora_currency', pref)
@@ -39,7 +39,7 @@ export const CurrencyProvider = ({ children }: { children: React.ReactNode }) =>
     // subscribe to profile changes so currency updates propagate in real-time
     const channel = supabase.channel('currency-sync')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, (payload) => {
-        const pref = payload.new?.currency_preference
+        const pref = payload.new?.currency
         if (pref && (pref === 'UZS' || pref === 'USD' || pref === 'EUR' || pref === 'RUB')) {
           setCurrencyState(pref)
           if (typeof window !== 'undefined') window.localStorage.setItem('finora_currency', pref)
@@ -61,7 +61,7 @@ export const CurrencyProvider = ({ children }: { children: React.ReactNode }) =>
     if (!user?.id) return true
 
     try {
-      const { error } = await supabase.from('profiles').upsert({ id: user.id, currency_preference: next }, { onConflict: 'id' })
+      const { error } = await supabase.from('profiles').upsert({ id: user.id, currency: next }, { onConflict: 'id' })
       if (error) {
         // revert
         setCurrencyState(prev)
