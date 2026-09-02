@@ -9,6 +9,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import VerifyEmail from './pages/VerifyEmail'
 import Dashboard from './pages/Dashboard'
+import Reviews from './pages/Reviews'
 // MoneyWisdom is accessible inside the authenticated Dashboard; no public Money Wisdom page
 import { useAuth, AuthProvider } from './hooks/useAuth'
 import { UpgradeModalProvider } from './components/UpgradeModalProvider'
@@ -124,6 +125,7 @@ function AppRoutes() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
           <Route path="/time-to-freedom" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/what-if" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         </Routes>

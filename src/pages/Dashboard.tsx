@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import { proFeatures } from '../data/proFeatures'
+import Reviews from './Reviews'
 
 type Goal = {
   id: number
@@ -21,7 +22,7 @@ type Goal = {
   monthly: number
 }
 
-type TabKey = 'home' | 'account' | 'goals' | 'calculators' | 'money_wisdom' | 'time_to_freedom' | 'what_if' | 'bad_habit'
+type TabKey = 'home' | 'account' | 'goals' | 'calculators' | 'money_wisdom' | 'time_to_freedom' | 'what_if' | 'bad_habit' | 'reviews'
 
 type Debt = {
   id: string
@@ -170,6 +171,7 @@ export default function Dashboard() {
         if (path === '/money-wisdom') setActiveTab('money_wisdom')
         if (path === '/time-to-freedom') setActiveTab('time_to_freedom')
         if (path === '/what-if') setActiveTab('what_if')
+        if (path === '/reviews') setActiveTab('reviews')
       }
 
     const storedProfile = (() => {
@@ -347,7 +349,8 @@ export default function Dashboard() {
     { key: 'money_wisdom', label: t('money_wisdom'), icon: '💡' },
     { key: 'time_to_freedom', label: t('time_to_freedom'), icon: '⏳' },
     { key: 'what_if', label: t('what_if'), icon: '🔮' },
-    { key: 'bad_habit', label: t('bad_habit_title'), icon: '🚭' }
+    { key: 'bad_habit', label: t('bad_habit_title'), icon: '🚭' },
+    { key: 'reviews', label: t('reviews_tab'), icon: '⭐' }
   ]
 
   const persistGoals = (nextGoals: Goal[]) => {
@@ -802,6 +805,12 @@ export default function Dashboard() {
       {activeTab === 'bad_habit' && (
         <div>
           <BadHabitPanel />
+        </div>
+      )}
+
+      {activeTab === 'reviews' && (
+        <div>
+          <Reviews />
         </div>
       )}
 
