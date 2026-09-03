@@ -7,6 +7,7 @@ import MoneyWisdom from './MoneyWisdom'
 import BadHabitPanel from '../components/BadHabitPanel'
 import TimeToFreedomPanel from '../components/TimeToFreedomPanel'
 import WhatIfPanel from '../components/WhatIfPanel'
+import Business from './Business'
 import { useUpgradeModal } from '../components/UpgradeModalProvider'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
@@ -22,7 +23,7 @@ type Goal = {
   monthly: number
 }
 
-type TabKey = 'home' | 'account' | 'goals' | 'calculators' | 'money_wisdom' | 'time_to_freedom' | 'what_if' | 'bad_habit' | 'reviews'
+type TabKey = 'home' | 'account' | 'goals' | 'calculators' | 'money_wisdom' | 'time_to_freedom' | 'what_if' | 'bad_habit' | 'reviews' | 'business'
 
 type Debt = {
   id: string
@@ -350,7 +351,8 @@ export default function Dashboard() {
     { key: 'time_to_freedom', label: t('time_to_freedom'), icon: '⏳' },
     { key: 'what_if', label: t('what_if'), icon: '🔮' },
     { key: 'bad_habit', label: t('bad_habit_title'), icon: '🚭' },
-    { key: 'reviews', label: t('reviews_tab'), icon: '⭐' }
+    { key: 'reviews', label: t('reviews_tab'), icon: '⭐' },
+    { key: 'business', label: t('business'), icon: '💼' }
   ]
 
   const persistGoals = (nextGoals: Goal[]) => {
@@ -811,6 +813,12 @@ export default function Dashboard() {
       {activeTab === 'reviews' && (
         <div>
           <Reviews />
+        </div>
+      )}
+
+      {activeTab === 'business' && (
+        <div>
+          <Business />
         </div>
       )}
 
