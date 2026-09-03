@@ -590,42 +590,53 @@ export default function Dashboard() {
   const balanceHealth = Math.max(0, Math.min(100, Math.round(((Number(profile?.monthly_savings || 0) || 0) / Math.max(Number(profile?.monthly_income || 0), 1)) * 100)))
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-10">
-      <div className="flex flex-col gap-4 rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_35px_rgba(15,23,42,0.07)] md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D4AF37]">{t('dashboard')}</p>
-          <h1 className="mt-2 text-3xl font-black text-slate-900">{t('welcome_back')}</h1>
+    <div className="space-y-6 pb-10">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-blue-50 to-slate-50 border border-slate-200 p-8 shadow-medium">
+        <div className="absolute inset-0 opacity-5 pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-l from-finora-gold via-amber-300 to-transparent rounded-full blur-3xl"></div>
         </div>
-        <div className="flex items-center gap-3">
-          {isPro && (
-            <span className="rounded-full border border-[#D4AF37] bg-[#FFF8D6] px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-[#7C4A00]">
-              FINORA PRO
-            </span>
-          )}
-          <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700">
-            {profile?.full_name || user?.email || 'Finora User'}
+        <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-accent-label text-finora-gold">{t('dashboard')}</p>
+            <h1 className="mt-2 text-header">{t('welcome_back')}</h1>
+            <p className="mt-1 text-sm text-slate-600">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </p>
           </div>
-          <button onClick={handleLogout} className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-            {t('logout')}
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {isPro && (
+              <span className="badge-pro">
+                FINORA PRO
+              </span>
+            )}
+            <div className="rounded-full border border-slate-200 bg-white/80 backdrop-blur-sm px-4 py-2 text-sm font-medium text-slate-700 shadow-soft">
+              {profile?.full_name || user?.email || 'Finora User'}
+            </div>
+            <button 
+              onClick={handleLogout} 
+              className="btn-secondary text-sm"
+            >
+              {t('logout')}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="rounded-[28px] border border-slate-200 bg-white p-3 shadow-[0_18px_35px_rgba(15,23,42,0.07)]">
-        <div className="flex flex-wrap gap-2">
+      <div className="card-base p-2 md:p-3">
+        <div className="flex flex-wrap gap-2 overflow-x-auto">
           {navTabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+              className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
                 activeTab === tab.key
-                  ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  ? 'nav-tab-active shadow-md'
+                  : 'nav-tab-inactive hover:bg-slate-150'
               }`}
             >
-              <span>{tab.icon}</span>
-              {tab.label}
+              <span className="text-lg">{tab.icon}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}
         </div>
@@ -634,66 +645,125 @@ export default function Dashboard() {
       {activeTab === 'home' && (
         <>
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('monthly_income')}</div>
-              <div className="mt-3 text-2xl font-black text-slate-900">
-                {libFormatMoney(Number(profile?.monthly_income || 0), currency)}
+            {/* Income Card - Green */}
+            <div className="card-premium relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent-savings/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute top-0 right-0 w-20 h-20 bg-accent-savings/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-label text-slate-500">{t('monthly_income')}</div>
+                  <div className="text-3xl">💰</div>
+                </div>
+                <div className="mt-4 text-amount text-accent-savings">
+                  {libFormatMoney(Number(profile?.monthly_income || 0), currency)}
+                </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('monthly_expenses')}</div>
-              <div className="mt-3 text-2xl font-black text-slate-900">
-                {libFormatMoney(Number(profile?.monthly_expenses || 0), currency)}
+            
+            {/* Expenses Card - Red/Coral */}
+            <div className="card-premium relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent-habit/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute top-0 right-0 w-20 h-20 bg-accent-habit/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-label text-slate-500">{t('monthly_expenses')}</div>
+                  <div className="text-3xl">💸</div>
+                </div>
+                <div className="mt-4 text-amount text-accent-habit">
+                  {libFormatMoney(Number(profile?.monthly_expenses || 0), currency)}
+                </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('net_savings_health')}</div>
-              <div className="mt-3 text-2xl font-black text-slate-900">{balanceHealth}%</div>
-              <div className="mt-1 text-sm text-slate-500">{t('financial_health')}</div>
+            
+            {/* Savings Health - Blue */}
+            <div className="card-premium relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent-goals/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute top-0 right-0 w-20 h-20 bg-accent-goals/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-label text-slate-500">{t('net_savings_health')}</div>
+                  <div className="text-3xl">📊</div>
+                </div>
+                <div className="mt-4">
+                  <div className="text-amount text-accent-goals">
+                    {balanceHealth}%
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-slate-200 overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        balanceHealth > 70 
+                          ? 'bg-gradient-to-r from-accent-savings to-accent-savings-dark'
+                          : balanceHealth > 40
+                          ? 'bg-gradient-to-r from-accent-calculator to-accent-goals-dark'
+                          : 'bg-gradient-to-r from-accent-habit to-accent-habit-dark'
+                      }`}
+                      style={{ width: `${balanceHealth}%` }}
+                    />
+                  </div>
+                  <div className="mt-1 text-xs text-slate-500">{t('financial_health')}</div>
+                </div>
+              </div>
             </div>
           </div>
 
           {isPro && (
-            <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_35px_rgba(15,23,42,0.07)]">
-              <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="card-premium p-6">
+              <div className="mb-6 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D4AF37]">{t('budget_optimizer')}</p>
-                  <h3 className="mt-2 text-2xl font-black text-slate-900">{t('budget_50_30_20')}</h3>
+                  <p className="text-accent-label text-finora-gold">{t('budget_optimizer')}</p>
+                  <h3 className="text-subheader">{t('budget_50_30_20')}</h3>
                 </div>
-                <span className="rounded-full bg-[#FFF8D6] px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-[#7C4A00]">PRO</span>
+                <span className="badge-pro">PRO</span>
               </div>
 
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('needs')}</div>
-                  <div className="mt-2 text-xl font-black text-slate-900">{libFormatMoney((Number(profile?.monthly_income || 0) * 0.5), currency)}</div>
+                {/* Needs - Green */}
+                <div className="card-accent bg-gradient-to-br from-accent-savings-light via-white to-white border-l-4 border-accent-savings overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent-savings/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative p-4">
+                    <div className="text-xs uppercase tracking-[0.2em] font-semibold text-accent-savings">{t('needs')}</div>
+                    <div className="mt-3 text-xl font-black text-accent-savings-dark">{libFormatMoney((Number(profile?.monthly_income || 0) * 0.5), currency)}</div>
+                    <div className="mt-2 text-xs text-slate-600">50% of income</div>
+                  </div>
                 </div>
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('wants')}</div>
-                  <div className="mt-2 text-xl font-black text-slate-900">{libFormatMoney((Number(profile?.monthly_income || 0) * 0.3), currency)}</div>
+                
+                {/* Wants - Blue */}
+                <div className="card-accent bg-gradient-to-br from-accent-calculator-light via-white to-white border-l-4 border-accent-calculator overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent-calculator/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative p-4">
+                    <div className="text-xs uppercase tracking-[0.2em] font-semibold text-accent-calculator">{t('wants')}</div>
+                    <div className="mt-3 text-xl font-black text-accent-calculator-dark">{libFormatMoney((Number(profile?.monthly_income || 0) * 0.3), currency)}</div>
+                    <div className="mt-2 text-xs text-slate-600">30% of income</div>
+                  </div>
                 </div>
-                <div className="rounded-2xl bg-[#FFF8D6] p-4">
-                  <div className="text-xs uppercase tracking-[0.18em] text-[#7C4A00]">{t('wealth_savings')}</div>
-                  <div className="mt-2 text-xl font-black text-[#7C4A00]">{libFormatMoney((Number(profile?.monthly_income || 0) * 0.2), currency)}</div>
+                
+                {/* Savings - Gold/Yellow */}
+                <div className="card-accent bg-gradient-to-br from-finora-gold-light via-white to-white border-l-4 border-finora-gold overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-finora-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative p-4">
+                    <div className="text-xs uppercase tracking-[0.2em] font-semibold text-finora-gold-dark">{t('wealth_savings')}</div>
+                    <div className="mt-3 text-xl font-black text-finora-gold-dark">{libFormatMoney((Number(profile?.monthly_income || 0) * 0.2), currency)}</div>
+                    <div className="mt-2 text-xs text-slate-600">20% of income</div>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-700">
-                {Number(profile?.monthly_expenses || 0) > Number(profile?.monthly_income || 0) * 0.5
+              <div className="mt-6 rounded-xl border border-finora-gold/20 bg-gradient-to-r from-finora-gold-light/50 via-finora-gold-light/30 to-transparent p-4 text-sm text-slate-700">
+                <span className="font-semibold">{Number(profile?.monthly_expenses || 0) > Number(profile?.monthly_income || 0) * 0.5
                   ? t('budget_over_50')
-                  : t('budget_on_track')}
+                  : t('budget_on_track')}</span>
               </div>
             </div>
           )}
 
           <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
-            <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_35px_rgba(15,23,42,0.07)]">
-              <div className="mb-5 flex items-center justify-between gap-3">
+            <section className="card-premium p-6">
+              <div className="mb-5 flex items-center justify-between gap-3 flex-wrap">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D4AF37]">{t('calculator')}</p>
-                  <h2 className="mt-2 text-2xl font-black text-slate-900">{t('banking_growth')}</h2>
+                  <p className="text-accent-label text-accent-calculator">{t('calculator')}</p>
+                  <h2 className="text-subheader">{t('banking_growth')}</h2>
                 </div>
-                <div className="rounded-full bg-[#FFF8D6] px-3 py-1 text-xs font-semibold text-[#8B5E00]">19% {t('deposit')}</div>
+                <div className="badge-base bg-accent-calculator-light text-accent-calculator-dark border border-accent-calculator/20">19% {t('deposit')}</div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-3">
@@ -732,24 +802,37 @@ export default function Dashboard() {
             </section>
 
             {!isPro && (
-            <aside className="rounded-[28px] border border-[#F8D66D]/30 bg-gradient-to-br from-[#111827] via-[#0F172A] to-[#1E293B] p-5 text-white shadow-[0_20px_50px_rgba(15,23,42,0.2)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#FDE68A]">{t('pro')}</p>
-              <h3 className="mt-2 text-2xl font-black text-white">{t('golden_pro')}</h3>
-              <div className="mt-4 rounded-2xl border border-[#FFD700]/20 bg-[#FFD700]/10 p-4 text-center">
-                <div className="text-3xl font-black text-[#FFD700]">79 000 UZS</div>
-                <div className="mt-1 text-sm text-slate-200">{t('per_month')}</div>
+            <aside className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 text-white shadow-premium border border-finora-gold/20">
+              <div className="absolute inset-0 opacity-10 pointer-events-none">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-l from-finora-gold via-amber-300 to-transparent rounded-full blur-3xl"></div>
               </div>
-              <button type="button" onClick={() => openUpgrade()} className="mt-5 w-full rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-4 py-3 text-base font-black text-slate-900">
-                {t('upgrade_pro_button')}
-              </button>
+              <div className="relative space-y-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-finora-gold">{t('pro')}</p>
+                  <h3 className="mt-2 text-3xl font-black text-white">{t('golden_pro')}</h3>
+                </div>
+                
+                <div className="rounded-2xl border border-finora-gold/30 bg-gradient-to-br from-finora-gold/10 via-finora-gold/5 to-transparent p-5 text-center">
+                  <div className="text-4xl font-black text-finora-gold">79 000</div>
+                  <div className="mt-1 text-sm text-slate-300">UZS {t('per_month')}</div>
+                </div>
+                
+                <button 
+                  type="button" 
+                  onClick={() => openUpgrade()} 
+                  className="w-full rounded-xl bg-gradient-to-r from-finora-gold via-amber-400 to-finora-gold px-4 py-3.5 text-base font-black text-slate-900 shadow-glow-gold hover:shadow-lg hover:scale-105 transition-all duration-200"
+                >
+                  {t('upgrade_pro_button')}
+                </button>
 
-              <div className="mt-6 space-y-3">
-                {proFeatures.features.map((feature) => (
-                  <div key={feature.key} className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-200">
-                    <span className="mr-2">{feature.icon}</span>
-                    {t(feature.key)}
-                  </div>
-                ))}
+                <div className="space-y-2 border-t border-finora-gold/20 pt-6">
+                  {proFeatures.features.map((feature) => (
+                    <div key={feature.key} className="flex items-center gap-3 rounded-lg border border-slate-700/50 bg-white/5 p-3 text-sm text-slate-200 hover:bg-white/10 transition-colors">
+                      <span className="text-lg flex-shrink-0">{feature.icon}</span>
+                      <span>{t(feature.key)}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </aside>
             )}
@@ -758,29 +841,46 @@ export default function Dashboard() {
       )}
 
       {activeTab === 'account' && (
-        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_35px_rgba(15,23,42,0.07)]">
-          <div className="flex items-center justify-between gap-3">
+        <div className="card-premium p-6">
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D4AF37]">{t('account_tab')}</p>
-              <h2 className="mt-2 text-2xl font-black text-slate-900">{t('financial_profile')}</h2>
+              <p className="text-accent-label text-accent-account">{t('account_tab')}</p>
+              <h2 className="text-subheader">{t('financial_profile')}</h2>
             </div>
-            <button type="button" onClick={() => setIsAccountModalOpen(true)} className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white">
+            <button type="button" onClick={() => setIsAccountModalOpen(true)} className="btn-primary">
               {t('edit_profile')}
             </button>
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('monthly_income')}</div>
-              <div className="mt-2 text-2xl font-black text-slate-900">{libFormatMoney(Number(profile?.monthly_income || 0), currency)}</div>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {/* Income */}
+            <div className="card-accent border-l-4 border-accent-savings bg-gradient-to-br from-accent-savings-light via-white to-white">
+              <div className="p-4">
+                <div className="text-label text-accent-savings">{t('monthly_income')}</div>
+                <div className="mt-3 text-amount text-accent-savings-dark">
+                  {libFormatMoney(Number(profile?.monthly_income || 0), currency)}
+                </div>
+              </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('total_expenses')}</div>
-              <div className="mt-2 text-2xl font-black text-slate-900">{libFormatMoney(Number(profile?.monthly_expenses || 0), currency)}</div>
+            
+            {/* Expenses */}
+            <div className="card-accent border-l-4 border-accent-habit bg-gradient-to-br from-accent-habit-light via-white to-white">
+              <div className="p-4">
+                <div className="text-label text-accent-habit">{t('total_expenses')}</div>
+                <div className="mt-3 text-amount text-accent-habit-dark">
+                  {libFormatMoney(Number(profile?.monthly_expenses || 0), currency)}
+                </div>
+              </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('monthly_savings_target')}</div>
-              <div className="mt-2 text-2xl font-black text-slate-900">{libFormatMoney(Number(profile?.monthly_savings || 0), currency)}</div>
+            
+            {/* Savings */}
+            <div className="card-accent border-l-4 border-accent-goals bg-gradient-to-br from-accent-goals-light via-white to-white">
+              <div className="p-4">
+                <div className="text-label text-accent-goals">{t('monthly_savings_target')}</div>
+                <div className="mt-3 text-amount text-accent-goals-dark">
+                  {libFormatMoney(Number(profile?.monthly_savings || 0), currency)}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -823,25 +923,25 @@ export default function Dashboard() {
       )}
 
       {activeTab === 'goals' && (
-        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_35px_rgba(15,23,42,0.07)]">
-          <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <section className="card-premium p-6">
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D4AF37]">{t('goals')}</p>
-              <h2 className="mt-2 text-2xl font-black text-slate-900">{t('financial_goals')}</h2>
+              <p className="text-accent-label text-accent-goals">{t('goals')}</p>
+              <h2 className="text-subheader">{t('financial_goals')}</h2>
             </div>
             <div className="flex items-center gap-3">
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+              <span className="badge-base bg-accent-goals-light text-accent-goals-dark border border-accent-goals/20">
                 {goals.length}/{limit}
               </span>
-              <button type="button" onClick={() => setIsGoalModalOpen(true)} className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+              <button type="button" onClick={() => setIsGoalModalOpen(true)} className="btn-primary">
                 {t('add_goal')}
               </button>
             </div>
           </div>
 
           {!isPro && (
-            <div className="mb-5 rounded-2xl border border-[#F9E5A8] bg-[#FFF8D6] p-3 text-sm font-medium text-[#7C4A00]">
-              {t('goal_limit_free')}
+            <div className="mb-6 rounded-xl border-l-4 border-finora-gold bg-gradient-to-r from-finora-gold-light/50 via-finora-gold-light/25 to-transparent p-4 text-sm font-medium text-finora-gold-dark">
+              ⭐ {t('goal_limit_free')}
             </div>
           )}
 
@@ -851,33 +951,52 @@ export default function Dashboard() {
               const countdown = getGoalCountdown(goal)
 
               return (
-                <div key={goal.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-lg font-bold text-slate-900">{goal.name}</div>
-                      <div className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">{libFormatMoney(goal.monthly, currency)} / {t('month')}</div>
+                <div key={goal.id} className="card-accent border-l-4 border-accent-goals bg-gradient-to-br from-accent-goals-light/20 via-white to-white overflow-hidden group hover:border-accent-goals-dark">
+                  <div className="p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-lg font-bold text-slate-900">{goal.name}</div>
+                        <div className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">
+                          {libFormatMoney(goal.monthly, currency)} / {t('month')}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <div className="text-2xl font-black text-accent-goals">{progress.toFixed(0)}%</div>
+                      </div>
                     </div>
-                    <div className="text-sm font-semibold text-[#B7791F]">{progress.toFixed(0)}%</div>
-                  </div>
-                  <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200">
-                    <div className="h-full rounded-full bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37]" style={{ width: `${progress}%` }} />
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-sm text-slate-600">
-                    <span>{libFormatMoney(goal.current, currency)}</span>
-                    <span>{libFormatMoney(goal.target, currency)}</span>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between gap-3">
-                    <span className="text-xs uppercase tracking-[0.18em] text-slate-500">{countdown.text}</span>
-                    <div className="flex items-center gap-2">
-                      <button type="button" onClick={() => updateGoal(goal.id, 100000)} className="rounded-xl bg-gradient-to-r from-[#FFD700] via-[#F59E0B] to-[#D4AF37] px-3 py-2 text-xs font-bold text-slate-900">
-                        {t('add_funds')}
-                      </button>
-                      <button type="button" onClick={() => {
-                        setGoalToDelete(goal)
-                        setIsDeleteGoalOpen(true)
-                      }} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700">
-                        {t('delete')}
-                      </button>
+                    <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-200">
+                      <div 
+                        className="h-full rounded-full bg-gradient-to-r from-accent-goals via-accent-goals to-accent-goals-dark transition-all duration-500" 
+                        style={{ width: `${progress}%` }} 
+                      />
+                    </div>
+                    <div className="mt-4 flex items-center justify-between text-sm text-slate-600">
+                      <span className="font-semibold text-slate-700">{libFormatMoney(goal.current, currency)}</span>
+                      <span className="text-xs text-slate-500">{libFormatMoney(goal.target, currency)}</span>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between gap-2">
+                      <span className="text-xs uppercase tracking-[0.18em] font-semibold text-accent-goals">
+                        {countdown.text} remaining
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          type="button" 
+                          onClick={() => updateGoal(goal.id, 100000)} 
+                          className="btn-primary text-xs"
+                        >
+                          {t('add_funds')}
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            setGoalToDelete(goal)
+                            setIsDeleteGoalOpen(true)
+                          }} 
+                          className="btn-secondary text-xs"
+                        >
+                          {t('delete')}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1079,18 +1198,32 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl bg-slate-100 p-4">
-                <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('contributions')}</div>
-                <div className="mt-2 text-xl font-black text-slate-900">{libFormatMoney(currentProjection.contributions, currency)}</div>
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              {/* Contributions */}
+              <div className="card-accent border-l-4 border-slate-400 bg-gradient-to-br from-slate-100 via-white to-white">
+                <div className="p-4">
+                  <div className="text-label text-slate-600">{t('contributions')}</div>
+                  <div className="mt-3 text-xl font-black text-slate-900">{libFormatMoney(currentProjection.contributions, currency)}</div>
+                  <div className="mt-2 text-xs text-slate-500">Your invested amount</div>
+                </div>
               </div>
-              <div className="rounded-2xl bg-slate-100 p-4">
-                <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('interest_earned')}</div>
-                <div className="mt-2 text-xl font-black text-[#B7791F]">{libFormatMoney(currentProjection.interest, currency)}</div>
+              
+              {/* Interest Earned */}
+              <div className="card-accent border-l-4 border-accent-calculator bg-gradient-to-br from-accent-calculator-light via-white to-white">
+                <div className="p-4">
+                  <div className="text-label text-accent-calculator">{t('interest_earned')}</div>
+                  <div className="mt-3 text-xl font-black text-accent-calculator-dark">{libFormatMoney(currentProjection.interest, currency)}</div>
+                  <div className="mt-2 text-xs text-slate-500">Earned interest</div>
+                </div>
               </div>
-              <div className="rounded-2xl bg-[#FFF8D6] p-4">
-                <div className="text-xs uppercase tracking-[0.18em] text-[#7C4A00]">{t('final_amount')}</div>
-                <div className="mt-2 text-xl font-black text-[#7C4A00]">{libFormatMoney(currentProjection.total, currency)}</div>
+              
+              {/* Final Amount */}
+              <div className="card-accent border-l-4 border-finora-gold bg-gradient-to-br from-finora-gold-light via-white to-white">
+                <div className="p-4">
+                  <div className="text-label text-finora-gold-dark">{t('final_amount')}</div>
+                  <div className="mt-3 text-xl font-black text-finora-gold-dark">{libFormatMoney(currentProjection.total, currency)}</div>
+                  <div className="mt-2 text-xs text-slate-500">Total future value</div>
+                </div>
               </div>
             </div>
 

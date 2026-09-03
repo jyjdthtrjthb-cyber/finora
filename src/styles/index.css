@@ -3,6 +3,140 @@
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-body { background: #0f172a; color: #0f172a; }
+body { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); color: #0f172a; }
 
-.bg-finora { background-color: #E6B800 }
+/* Decorative background elements */
+@layer components {
+  .bg-finora { background-color: #D4AF37; }
+
+  /* Card styles */
+  .card-base {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-soft transition-all duration-300;
+  }
+
+  .card-premium {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-medium transition-all duration-300 hover:shadow-premium hover:scale-102;
+  }
+
+  .card-accent {
+    @apply card-base overflow-hidden;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply rounded-lg bg-gradient-to-r from-finora-gold via-amber-400 to-finora-gold px-4 py-2.5 font-semibold text-slate-900 transition-all duration-200 hover:shadow-glow-gold hover:scale-105 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:border-slate-300;
+  }
+
+  .btn-accent {
+    @apply rounded-lg px-4 py-2.5 font-semibold text-white transition-all duration-200;
+  }
+
+  /* Gradient backgrounds for sections */
+  .section-home {
+    @apply relative;
+  }
+
+  .section-home::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-radial from-green-50 via-transparent to-transparent opacity-0 pointer-events-none;
+  }
+
+  /* Decorative blob backgrounds */
+  .blob-decoration {
+    @apply absolute inset-0 opacity-5 pointer-events-none;
+  }
+
+  .blob-decoration::before {
+    content: '';
+    @apply absolute w-96 h-96 bg-gradient-to-r from-finora-gold via-amber-300 to-transparent rounded-full blur-3xl;
+  }
+
+  /* Typography utilities */
+  .text-header {
+    @apply text-3xl font-black text-slate-900;
+  }
+
+  .text-subheader {
+    @apply text-2xl font-black text-slate-900;
+  }
+
+  .text-label {
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-slate-500;
+  }
+
+  .text-accent-label {
+    @apply text-xs font-semibold uppercase tracking-[0.2em];
+  }
+
+  /* Financial number styles */
+  .text-amount {
+    @apply text-2xl font-black text-slate-900;
+  }
+
+  .text-amount-large {
+    @apply text-4xl font-black text-slate-900;
+  }
+
+  /* Badge styles */
+  .badge-base {
+    @apply rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em];
+  }
+
+  .badge-pro {
+    @apply badge-base border border-finora-gold bg-finora-gold-light text-finora-gold-dark shadow-glow-gold;
+  }
+
+  /* Navigation tab styles */
+  .nav-tab-active {
+    @apply bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg shadow-slate-900/20;
+  }
+
+  .nav-tab-inactive {
+    @apply bg-slate-100 text-slate-700 hover:bg-slate-200;
+  }
+
+  /* Accent color utilities - using CSS directly to avoid circular dependencies */
+
+  /* Smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Hover effects */
+  .card-hover {
+    @apply transition-smooth hover:shadow-premium hover:scale-102 hover:-translate-y-1;
+  }
+
+  /* Accessibility - reduce motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Smooth page transitions */
+@layer utilities {
+  .animate-in {
+    @apply animate-fade-in;
+  }
+
+  .scale-102 {
+    transform: scale(1.02);
+  }
+
+  .scale-105 {
+    transform: scale(1.05);
+  }
+
+  .-translate-y-1 {
+    transform: translateY(-4px);
+  }
+}
+
